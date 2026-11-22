@@ -193,12 +193,7 @@ pub(super) fn session_response_from_instance_with_plan(
         structured_view_off: false,
         // Same agent resolution as `acp_agent` above; computed once here so
         // the web dashboard and native TUI stop mirroring the gate.
-        keeps_context: inst.acp_transcript_cli_resumable(
-            inst.agent_name
-                .as_deref()
-                .filter(|s| !s.is_empty())
-                .unwrap_or(inst.tool.as_str()),
-        ),
+        keeps_context: inst.acp_transcript_cli_resumable(&inst.effective_acp_agent()),
         // The composer palette, the queued-prompt clear-boundary hint and
         // the queued strip's reason read these instead of a client-side
         // per-agent mirror.
