@@ -55,7 +55,7 @@ struct StructuredSeed {
 /// Otherwise a CLI-resumable terminal transcript in `agent_session_id` is
 /// carried into a seeded `session/load` (#2252), if the transcript is present.
 fn resolve_structured_seed(
-    tool: &str,
+    execution_agent: &str,
     acp_agent: &str,
     acp_session_id: Option<&str>,
     agent_session_id: Option<&str>,
@@ -69,7 +69,8 @@ fn resolve_structured_seed(
             import_terminal: false,
         };
     }
-    if crate::agents::acp_transcript_cli_resumable(tool, acp_agent) && transcript_present {
+    if crate::agents::acp_transcript_cli_resumable(execution_agent, acp_agent) && transcript_present
+    {
         if let Some(id) = agent_session_id.filter(|s| !s.trim().is_empty()) {
             return StructuredSeed {
                 stored_acp_session_id: Some(id.to_string()),
@@ -376,7 +377,7 @@ async fn deferred_enable_request(
             })
             .unwrap_or(false);
     let seed = resolve_structured_seed(
-        &instance.tool,
+        &instance.execution_identity_name(&agent_name),
         &agent_name,
         instance.acp_session_id.as_deref(),
         resume_sid,
@@ -775,7 +776,7 @@ async fn agent_terminal_plan(
             },
         );
     }
-    if !crate::agents::acp_transcript_cli_resumable(&instance.tool, agent) {
+    if !instance.acp_transcript_cli_resumable(agent) {
         return Ok(TerminalPlan::StartsFresh(AgentNotResumable));
     }
     let Some(sid) = instance.acp_session_id.as_deref() else {
@@ -4236,6 +4237,17 @@ mod tests {
                 false,
             ),
             ("claude", "claude", None, None, false, true, None, false),
+            // The caller passes a custom tool's `agent_execution_as` identity.
+            (
+                "claude",
+                "claude-code",
+                None,
+                Some("agent-1"),
+                false,
+                true,
+                Some("agent-1"),
+                true,
+            ),
         ];
         for (tool, agent, acp, agent_sid, import, present, expected, replay) in cases {
             let s = resolve_structured_seed(tool, agent, acp, agent_sid, import, present);
