@@ -12,19 +12,19 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/github-script@v9.0.0'
         - 'cachix/cachix-action@v17'
-        - 'nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c'
+        - 'nixbuild/nix-quick-install-action@v35'
     '.github/workflows/cancel-obsolete-queue-runs.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/github-script@v9.0.0'
     '.github/workflows/ci.yml':
-        - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
+        - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
-        - 'aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd'
-        - 'dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca'
+        - 'aws-actions/configure-aws-credentials@v6.3.0'
+        - 'dtolnay/rust-toolchain@stable'
         - 'embarkstudios/cargo-deny-action@v2.1.1'
-        - 'kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed'
-        - 'nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c'
+        - 'kunobi-ninja/kache-action@v1'
+        - 'nixbuild/nix-quick-install-action@v35'
         - 'runs-on/action@v2.6.0'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@v7.0.1'
@@ -40,18 +40,18 @@ workflows:
         - 'docker/setup-buildx-action@v4.4.1'
         - 'docker/setup-qemu-action@v4.4.0'
     '.github/workflows/docs.yml':
-        - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
+        - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
         - 'actions/deploy-pages@v5.0.1'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-pages-artifact@v5.0.0'
-        - 'dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca'
+        - 'dtolnay/rust-toolchain@stable'
     '.github/workflows/e2e-recording.yml':
-        - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
+        - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
-        - 'dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca'
+        - 'dtolnay/rust-toolchain@stable'
         - 'runs-on/action@v2.6.0'
     '.github/workflows/needs-triage.yml': []
     '.github/workflows/nightly.yml':
@@ -61,18 +61,18 @@ workflows:
     '.github/workflows/nix-npm-hash-fix-pr.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/upload-artifact@v7.0.2'
-        - 'nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c'
+        - 'nixbuild/nix-quick-install-action@v35'
     '.github/workflows/nix-npm-hash.yml':
         - 'actions/checkout@v7.0.1'
-        - 'nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c'
+        - 'nixbuild/nix-quick-install-action@v35'
     '.github/workflows/pr-template-check.yml':
         - 'actions/github-script@v9.0.0'
     '.github/workflows/pr-title-check.yml':
         - 'amannn/action-semantic-pull-request@v6.1.1'
     '.github/workflows/release-plz.yml':
-        - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
+        - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
-        - 'dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca'
+        - 'dtolnay/rust-toolchain@stable'
         - 'release-plz/action@v0.5.148'
     '.github/workflows/release.yml':
         - 'actions/checkout@v7.0.1'
@@ -82,22 +82,22 @@ workflows:
     '.github/workflows/rust-toolchain-bump.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/tests.yml':
-        - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
+        - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
         - 'actions/github-script@v9.0.0'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
-        - 'aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd'
+        - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'codecov/codecov-action@v7.1.1'
         - 'codecov/test-results-action@v1.2.1'
-        - 'dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca'
-        - 'kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed'
+        - 'dtolnay/rust-toolchain@stable'
+        - 'kunobi-ninja/kache-action@v1'
         - 'runs-on/action@v2.6.0'
         - 'taiki-e/install-action@v2.88.0'
     '.github/workflows/verify-lockfile.yml':
         - 'actions/checkout@v7.0.1'
 dependencies:
-    'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9':
+    'actions/cache@v6.1.0':
         ref: 'v6.1.0'
         commit: 'sha1-55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         owner_id: 44036562
@@ -154,7 +154,7 @@ dependencies:
         commit: 'sha1-48f256284bd46cdaab1048c3721360e808335d50'
         owner_id: 4038316
         repo_id: 220418983
-    'aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd':
+    'aws-actions/configure-aws-credentials@v6.3.0':
         ref: 'v6.3.0'
         commit: 'sha1-e1253824e5c10ff9df46874f81ed3ec929e19cfd'
         owner_id: 57468012
@@ -211,11 +211,6 @@ dependencies:
         commit: 'sha1-99012661954931238ded8c8b007157a8430204e1'
         owner_id: 5429470
         repo_id: 288487894
-    'dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca':
-        ref: 'stable'
-        commit: 'sha1-39008827e6b4319a349e9a42dfc90579dd25f1ca'
-        owner_id: 1940490
-        repo_id: 260749683
     'dtolnay/rust-toolchain@stable':
         ref: 'stable'
         commit: 'sha1-39008827e6b4319a349e9a42dfc90579dd25f1ca'
@@ -231,12 +226,12 @@ dependencies:
         commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         owner_id: 9919
         repo_id: 259445878
-    'kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed':
-        ref: 'main'
-        commit: 'sha1-ad7317540dcdd71c904f7a60a87b620a0c0e67ed'
+    'kunobi-ninja/kache-action@v1':
+        ref: 'v1'
+        commit: 'sha1-061011817fd04b0e460f79d6bb3c115b1fc8f029'
         owner_id: 227648351
         repo_id: 1159487598
-    'nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c':
+    'nixbuild/nix-quick-install-action@v35':
         ref: 'v35'
         commit: 'sha1-9f63be77f412a248c9d9a65a4c82cf066cdf8f0c'
         owner_id: 60610456
