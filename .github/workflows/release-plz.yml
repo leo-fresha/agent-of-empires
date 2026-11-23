@@ -34,7 +34,7 @@ jobs:
       contents: read
       actions: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
@@ -58,10 +58,10 @@ jobs:
           fi
 
       - name: Install Rust toolchain
-        uses: ./.github/actions/rust-toolchain
+        uses: $/.github/actions/rust-toolchain
 
       - name: Run release-plz
-        uses: release-plz/action@66b324fd6c72d05d2a08568492ecdd62bfb8a62b # v0.5.148
+        uses: release-plz/action@v0.5.148
         with:
           command: release
         env:
@@ -88,16 +88,16 @@ jobs:
       group: release-plz-${{ github.ref }}
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: ./.github/actions/rust-toolchain
+        uses: $/.github/actions/rust-toolchain
 
       - name: Run release-plz
-        uses: release-plz/action@66b324fd6c72d05d2a08568492ecdd62bfb8a62b # v0.5.148
+        uses: release-plz/action@v0.5.148
         with:
           command: release-pr
         env:
