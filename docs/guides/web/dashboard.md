@@ -76,33 +76,29 @@ Completing or skipping the tour records `app_state.has_seen_web_tour` on the ser
 
 While no plugin that provides suggestions is installed and a featured one exists, the homepage shows a one-line hint under the action cards. **Set up suggestions** opens a sheet that installs the featured providers you pick, then shows each plugin's setup checks (with its fix text and **Check again**). **More sources in the Marketplace** opens Settings > Plugins > Marketplace with the Suggestions filter on (`/settings/plugins?marketplace=suggestions`). The hint is skipped during the tour, on read-only and CityHall dashboards, and when the homepage section is off in Settings > Suggestions. Dismissing it stores `aoe-suggestions-hint-dismissed` in the synced web UI state, so it stays hidden on your other devices.
 
-## Sidebar sort
+## Sidebar grouping and sort
 
-By default the sidebar shows your manually-ordered list. Drag a row (press-and-hold) to move it; the order persists across browsers and devices via `workspace-ordering.json`. To reorder whole projects, press-and-drag the project/group header itself (there is no separate handle); this group order is per-browser (localStorage), not synced. Group drag is disabled while a filter is active or a computed sort mode is selected.
+The sidebar header's view button reads the grouping and the sort, for example **Repository · Custom**; in the compact rail it is a layers icon. It opens one menu with both. The grouping and sort are shared: the TUI and every browser on this server show the same pick, and a change made in one shows up in the others without a reload.
 
-Each project header shows the project icon next to its name, with a count of the sessions it holds. Hovering the header swaps the icon for a fold chevron; clicking the header collapses or expands the project's sessions.
+![The sidebar view menu](../../assets/web/sidebar-grouping.png)
 
-A sort picker next to the filter button offers three modes:
+**Group by**:
 
-- **Manual** (default): keeps your drag-ordered list, drag enabled.
-- **Recent activity**: orders by the most recent of `last_accessed_at`, `idle_entered_at`, and `created_at` across each workspace's sessions, descending.
-- **Attention**: floats sessions needing a human to the top. Ranks by status (Waiting, Error, Idle, Unknown, Running, Stopped, transient states last); session and plugin attention requests rise within their tier, favorited rows come first within a status rank, and ties break by most-recent activity.
+- **Repository** (default): a header per git repository, with your Groups nested inside it. Sessions in no Group sit directly under the repository header. A session split across Groups appears once per Group.
+- **My groups**: a header per user-defined Group, assigned in the TUI rename dialog, with `aoe group move`, or via **Move to another group** below. Ungrouped sessions fall into an **Ungrouped** bucket at the bottom.
 
-Drag-to-reorder is disabled in the computed modes. The picker's state is per-browser (localStorage), not synced and not tied to your profile. The Multi-repo and Scratch groups default to the bottom; in manual mode you can drag them anywhere, in computed modes they stay at the bottom.
+Collapse state is tracked per grouping, in this browser.
 
-## Sidebar grouping: repo, organization, group, both, or status
+**Sort**:
 
-A grouping picker (layers icon) next to the sort picker opens a menu of axes, so any of them is one pick away:
+- **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Rows and headers you never moved sit on top, newest first. The order is the one the TUI uses, stored in `workspace-ordering.json`.
+- **Name**: rows A to Z by title, headers by name, ignoring case. Dragging a row or header switches to Custom, starting from the order on screen, so only what you dragged moves.
+- **Reset to newest first** clears the Custom order for every Client.
+- Plugin sorts, when a plugin offers one, are listed below and apply only in this browser until you reload or pick another sort. Dragging is off while one applies.
 
-![The sidebar grouped by session status, with the grouping picker open](../../assets/web/sidebar-grouping.png)
+Pinned rows stay at the top of their header under every sort. The Multi-repo and Scratch headers stay at the bottom. Header drag is off while a filter is active, and every drag is off while a plugin facet filters the rows.
 
-- **By repo** (default): groups by git repository.
-- **By organization**: groups repositories by the owner in their git remote (any hosted remote, not only GitHub), with each repository's header inside its owner. Repos with no resolvable owner fall into a **No organization** bucket pinned to the bottom.
-- **By group** (**Group** in the picker): groups by the user-defined group assigned in the TUI rename dialog, with `aoe group move`, or via **Move to another group** below. Ungrouped sessions fall into an **Ungrouped** bucket pinned to the bottom.
-- **By repo and group**: repository headers with user groups nested inside each. A session split across groups appears once per subgroup.
-- **By status**: groups by each session's actual execution status, in the same attention order the Attention sort and the Board's cards use: Waiting, Error, Idle, Unknown, Running, Stopped, then the transient Creating, Deleting and Starting. A workspace whose sessions differ in status appears once per status.
-
-The choice is per-browser (localStorage). Collapse state is tracked separately per axis. You can move a session between groups from the web context menu, but drag-reorder lives on the repo axis only.
+The filter button opens a text filter and a **Needs you** toggle, which shows only the sessions waiting on you, in error, flagged urgent, or flagged by a plugin, under their headers, and hides the "Snoozed & archived" footer. Closing the filter clears both.
 
 **Move to another group.** Right-click (long-press on touch) a session row and choose **More > Move to another group**. The dialog lists the profile's existing groups with the current one highlighted: pick one, or type a new path to create that group. **Remove from group** (or clearing the field) drops the session back to **Ungrouped**. With the list open, Enter picks the highlighted group and a second Enter saves; Escape closes the list, then the dialog. Group paths use `/` for hierarchy (e.g. `work/projects`). Hidden in read-only mode.
 
@@ -116,10 +112,10 @@ replay against replacement sessions or a replacement daemon.
 
 The right-click (long-press on touch) context menu on any session row exposes these triage primitives:
 
-- **Pin**: floats the workspace to the top in every sort mode. Pin is web-only and distinct from the favorite mark. Favorites keep their `✦` marker in both normal and compact sidebars. On the web, favorite stays a within-tier Attention signal; in the TUI it pins to the top of its sibling scope in every sort order while `session.favorites_first` is on (the default).
+- **Pin**: floats the workspace to the top of its header in every sort. Pin is web-only and distinct from the favorite mark. Favorites keep their `✦` marker in both normal and compact sidebars; in the TUI a favorite pins to the top of its sibling scope under Name while `session.favorites_first` is on (the default).
 - **Archive**: tears down every tmux session the workspace owns (agent, web terminal, container terminal, and tool sub-sessions; pass `kill_pane: false` in the API body, or `--no-kill` on the CLI, to skip the tmux teardown) and shuts down the structured-view worker for ACP sessions, then sinks the row into the collapsible "Snoozed & archived" footer. Daemon restarts skip archived sessions. An archived session never starts or resumes, whether from a message, **Start**, attaching, or a daemon restart; unarchive it first. See #1868.
 - **Snooze**: sinks the row for a chosen duration (presets: 1h, 2h, 3h, 4h, 5h, 6h, 1d, 1w). Wakes when the timer expires; sending a message wakes it early.
-- **Ignore managed session**: for a session another session created or drives, hides it from the attention sort and badges while keeping it live and in the list. It is neither archived nor trashed, so it still starts and accepts direct user input, which clears the marker; non-user sends (MCP `send_to`, plugin messages and turns) return an `ignored` error until it is unignored or reclaimed. Pinning, favoriting, archiving, or snoozing also clears the marker. **Take ownership back** in the same menu clears the manager link and the ignore marker together, leaving the session, its conversation, and its other triage marks untouched.
+- **Ignore managed session**: for a session another session created or drives, hides it from attention badges and the Needs you filter while keeping it live and in the list. It is neither archived nor trashed, so it still starts and accepts direct user input, which clears the marker; non-user sends (MCP `send_to`, plugin messages and turns) return an `ignored` error until it is unignored or reclaimed. Pinning, favoriting, archiving, or snoozing also clears the marker. **Take ownership back** in the same menu clears the manager link and the ignore marker together, leaving the session, its conversation, and its other triage marks untouched.
 
 ### Showing one session
 
@@ -141,17 +137,17 @@ With more than one row selected, right-click (long-press on touch) any selected 
 
 ## Projects
 
-A Projects section near the bottom of the sidebar (above "Snoozed & archived") lists your registered Projects. It is the same registry the new-session wizard's "Projects" list reads, and it shows on every grouping axis. The section is expanded by default; its collapsed state persists per-browser.
+A Projects section near the bottom of the sidebar (above "Snoozed & archived") lists your registered Projects. It is the same registry the new-session wizard's "Projects" list reads, and it shows under both groupings. The section is expanded by default; its collapsed state persists per-browser.
 
 What it lists depends on whether the grouping draws repository headers:
 
-- **By repo**, **By organization** and **By repo and group** draw them, so the section is **Projects, no sessions**: registered Projects that are not pinned and have no live session. A pinned Project renders above as its own header, with or without sessions, and a Project with live sessions renders above as a normal group. Repository headers backed by a registered Project carry a ◇ marker, and a pinned one ◆.
-- **By group** draws Groups instead, so the section is **Projects** and lists every registered Project once, with or without live sessions; a pinned one is marked ◆.
+- **Repository** draws them, so the section is **Projects, no sessions**: registered Projects that are not pinned and have no live session. A pinned Project renders above as its own header, with or without sessions, and a Project with live sessions renders above as a normal group. Repository headers backed by a registered Project carry a ◇ marker, and a pinned one ◆.
+- **My groups** draws Groups instead, so the section is **Projects** and lists every registered Project once, with or without live sessions; a pinned one is marked ◆.
 
 The compact sidebar labels it **Projects** in every mode.
 
 - **Add** with the **+** on the section header: browse for a path or type one, optionally set a name and a default base branch, choose global or profile scope, then save. The project appears in the section, ready to start work in.
-- **Start a session** by clicking a project row (or its **+**), which opens the new-session flow in that repo. Once it has a session it moves up into the normal group list, except **By group**, where it stays in the section.
+- **Start a session** by clicking a project row (or its **+**), which opens the new-session flow in that repo. Once it has a session it moves up into the normal group list, except under **My groups**, where it stays in the section.
 - **Project settings** and **Remove** live in the row's right-click (long-press on touch) menu. Project settings control the default base branch plus worktree-by-default, smart-rename and start-in-container overrides. Remove targets that row's registrations; see [project registry scope](../multi-repo-workspaces.md#web-dashboard). The add, edit, and remove controls are hidden in read-only mode.
 
 ## Settings

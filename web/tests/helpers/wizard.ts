@@ -93,7 +93,6 @@ export function sessionStub(overrides: Record<string, unknown> = {}) {
     id: "seed-session",
     title: "seed",
     project_path: "/tmp/example",
-    group_path: "/tmp",
     ...overrides,
   });
 }

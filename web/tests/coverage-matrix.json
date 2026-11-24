@@ -944,10 +944,10 @@
       "components": [
         "web/src/lib/featureUse.ts",
         "web/src/App.tsx",
-        "web/src/hooks/useSidebarPrefs.ts",
-        "web/src/components/command-palette/CommandPalette.tsx"
+        "web/src/components/command-palette/CommandPalette.tsx",
+        "web/src/hooks/app/useSidebarModel.ts"
       ],
-      "notes": "Sort picker, attention shortcut and palette cheat codes post their registry names to /api/telemetry/feature-use."
+      "notes": "The view menu, attention shortcut and palette cheat codes post their registry names to /api/telemetry/feature-use."
     },
     {
       "id": "settings.theme-persistence-passphrase",
@@ -1403,7 +1403,7 @@
         "web/src/components/sidebar/SessionRow.tsx",
         "web/src/components/WorkspaceSidebar.tsx"
       ],
-      "notes": "A worktree row that collapsed more than one session into itself can expand into a full, indented row per session behind a guide line, instead of leaving every session but the row's picked one unreachable. Each expanded row has its own click-to-navigate (a modified click never selects the group), single-session context menu, optimistic triage and active-session marking; none of them read or write the group's selection or triage state. Expanded rows hide in the compact rail. On the group axis one workspace is split across groups under a single id, so every slice's children reconcile their optimistic overrides, and a later canonical update is not masked by a stale pin. A session keeps reconciling after its siblings leave, so a worktree going 2 -> 1 -> 2 sessions does not resurrect a stale override."
+      "notes": "A worktree row that collapsed more than one session into itself can expand into a full, indented row per session behind a guide line, instead of leaving every session but the row's picked one unreachable. Each expanded row has its own click-to-navigate (a modified click never selects the group), single-session context menu, optimistic triage and active-session marking; none of them read or write the group's selection or triage state. Expanded rows hide in the compact rail. Under My groups one workspace is split across groups under a single id, so every slice's children reconcile their optimistic overrides, and a later canonical update is not masked by a stale pin. A session keeps reconciling after its siblings leave, so a worktree going 2 -> 1 -> 2 sessions does not resurrect a stale override."
     },
     {
       "id": "app-shell.mobile-chrome-collapse",
@@ -2781,13 +2781,6 @@
       "components": []
     },
     {
-      "id": "sidebar.sort-hook",
-      "kind": "vitest",
-      "risk": "medium",
-      "specs": ["src/hooks/useSidebarPrefs.test.ts"],
-      "components": []
-    },
-    {
       "id": "sidebar.repo-groups-hook",
       "kind": "vitest",
       "risk": "medium",
@@ -2795,34 +2788,42 @@
       "components": []
     },
     {
-      "id": "sidebar.sort-toggle-ui",
+      "id": "sidebar.view-menu-ui",
       "kind": "mocked-playwright",
       "risk": "high",
-      "specs": ["tests/sidebar-sort-mode.spec.ts"],
+      "specs": ["tests/sidebar-view.spec.ts", "src/components/__tests__/WorkspaceSidebarView.test.tsx"],
       "components": [
         "web/src/components/WorkspaceSidebar.tsx",
-        "web/src/components/SidebarSortPicker.tsx",
+        "web/src/components/sidebar/SidebarViewMenu.tsx",
         "web/src/components/Tooltip.tsx",
         "web/src/components/sidebar/SidebarToolbar.tsx"
-      ]
+      ],
+      "notes": "One view button reads \"<Grouping> · <Sort>\" and opens the shared grouping and sort, Reset to newest first, and this browser's plugin sorts; it keeps the filter and new-session buttons on its row (#5896)."
     },
     {
       "id": "sidebar.popup-escape-keeps-selection",
       "kind": "vitest",
       "risk": "medium",
-      "specs": ["src/components/__tests__/SidebarSortPicker.test.tsx"],
+      "specs": ["src/components/__tests__/SidebarViewMenu.test.tsx"],
       "components": [
-        "web/src/components/SidebarSortPicker.tsx",
+        "web/src/components/sidebar/SidebarViewMenu.tsx",
         "web/src/components/useOutsideDismiss.ts",
         "web/src/components/sidebar/useSidebarSelection.ts"
       ]
     },
     {
-      "id": "sidebar.sort-live",
+      "id": "sidebar.shared-view-live",
       "kind": "mocked-playwright",
       "risk": "medium",
-      "specs": ["tests/sidebar-sort-mode.spec.ts"],
-      "components": ["web/src/components/WorkspaceSidebar.tsx", "web/src/components/SidebarSortPicker.tsx"]
+      "specs": ["tests/sidebar-view.spec.ts", "src/hooks/__tests__/useSidebarModel.test.tsx"],
+      "components": [
+        "web/src/components/WorkspaceSidebar.tsx",
+        "web/src/hooks/useSessions.ts",
+        "web/src/hooks/app/useSidebarModel.ts",
+        "web/src/lib/sidebarView.ts",
+        "web/src/lib/sidebarReorder.ts"
+      ],
+      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom, and Reset clears the shared Custom order."
     },
     {
       "id": "sidebar.plugin-sort-filter",
@@ -2831,7 +2832,7 @@
       "specs": ["tests/plugin-sort-filter.spec.ts"],
       "components": [
         "web/src/components/WorkspaceSidebar.tsx",
-        "web/src/components/SidebarSortPicker.tsx",
+        "web/src/components/sidebar/SidebarViewMenu.tsx",
         "web/src/components/plugin/PluginSlots.tsx"
       ]
     },
@@ -2908,13 +2909,6 @@
       "components": ["web/src/lib/sidebarGroups.ts"]
     },
     {
-      "id": "sidebar.axis-hook",
-      "kind": "vitest",
-      "risk": "medium",
-      "specs": ["src/hooks/useSidebarPrefs.test.ts"],
-      "components": ["web/src/hooks/useSidebarAxis.ts"]
-    },
-    {
       "id": "sidebar.group-axis-live",
       "kind": "mocked-playwright",
       "risk": "high",
@@ -2923,7 +2917,8 @@
         "web/src/components/WorkspaceSidebar.tsx",
         "web/src/hooks/useSessionGroups.ts",
         "web/src/lib/sidebarGroups.ts"
-      ]
+      ],
+      "notes": "My groups, picked in the view menu; the pick comes back from the Daemon after a reload and collapse stays per grouping."
     },
     {
       "id": "sidebar.nested-axis-pure",
@@ -2941,51 +2936,8 @@
         "web/src/components/WorkspaceSidebar.tsx",
         "web/src/hooks/useNestedSidebarGroups.ts",
         "web/src/lib/sidebarGroups.ts"
-      ]
-    },
-    {
-      "id": "sidebar.org-axis-pure",
-      "kind": "vitest",
-      "risk": "high",
-      "specs": ["src/lib/__tests__/sidebarGroups.test.ts"],
-      "components": ["web/src/lib/sidebarGroups.ts"]
-    },
-    {
-      "id": "sidebar.org-axis-hook",
-      "kind": "vitest",
-      "risk": "medium",
-      "specs": ["src/hooks/__tests__/sidebarGroupCollapse.test.tsx"],
-      "components": ["web/src/hooks/useOrgGroups.ts"]
-    },
-    {
-      "id": "sidebar.org-axis-live",
-      "kind": "mocked-playwright",
-      "risk": "high",
-      "specs": ["tests/sidebar-grouping.spec.ts"],
-      "components": [
-        "web/src/components/WorkspaceSidebar.tsx",
-        "web/src/hooks/useOrgGroups.ts",
-        "web/src/lib/sidebarGroups.ts"
-      ]
-    },
-    {
-      "id": "sidebar.status-axis-pure",
-      "kind": "vitest",
-      "risk": "high",
-      "specs": ["src/lib/__tests__/sidebarGroups.test.ts"],
-      "components": ["web/src/lib/sidebarGroups.ts"]
-    },
-    {
-      "id": "sidebar.status-axis-live",
-      "kind": "mocked-playwright",
-      "risk": "high",
-      "specs": ["tests/sidebar-grouping.spec.ts"],
-      "components": [
-        "web/src/components/SidebarAxisPicker.tsx",
-        "web/src/components/WorkspaceSidebar.tsx",
-        "web/src/hooks/useStatusGroups.ts",
-        "web/src/lib/sidebarGroups.ts"
-      ]
+      ],
+      "notes": "Repository: Groups nest under each repository header and ungrouped rows sit straight under it."
     },
     {
       "id": "session.lifecycle",
@@ -4776,7 +4728,7 @@
         "web/src/hooks/acpSession/stateCache.ts",
         "web/src/lib/acpTypes.ts"
       ],
-      "notes": "Retry, and Install and retry once its install succeeds, replace the banner with the startup line (Starting <Agent>\u2026, with its elapsed count and Restart after 30s), also for a Session that ran before, and never show both; the Agent starting ends the line and shows the transcript. A startup error that ends the Retry with the same cause, after spawn failed: or restart spawn failed: and any reason code, brings the banner back as <Agent> still couldn't start with Same error as before., then the cause's own fix and actions. A refused Retry request fails the same way without its HTTP status. A reload, or a later error with no Retry, reads as a first failure again."
+      "notes": "Retry, and Install and retry once its install succeeds, replace the banner with the startup line (Starting <Agent>…, with its elapsed count and Restart after 30s), also for a Session that ran before, and never show both; the Agent starting ends the line and shows the transcript. A startup error that ends the Retry with the same cause, after spawn failed: or restart spawn failed: and any reason code, brings the banner back as <Agent> still couldn't start with Same error as before., then the cause's own fix and actions. A refused Retry request fails the same way without its HTTP status. A reload, or a later error with no Retry, reads as a first failure again."
     },
     {
       "id": "acp.startup-error-banner-retry-changed-cause",
@@ -4798,7 +4750,7 @@
         "web/src/hooks/acpSession/stateCache.ts",
         "web/src/lib/acpTypes.ts"
       ],
-      "notes": "Retry, and Install and retry once its install succeeds, replace the banner with the startup line (Starting <Agent>\u2026, with its elapsed count and Restart after 30s), also for a Session that ran before, and never show both; the Agent starting ends the line and shows the transcript. A startup error, or a refused Retry request, with a different cause brings the banner back as <Agent> still couldn't start with It failed differently this time: and the new cause's first line, then the new cause's fix and actions. Details hold the full error with Copy."
+      "notes": "Retry, and Install and retry once its install succeeds, replace the banner with the startup line (Starting <Agent>…, with its elapsed count and Restart after 30s), also for a Session that ran before, and never show both; the Agent starting ends the line and shows the transcript. A startup error, or a refused Retry request, with a different cause brings the banner back as <Agent> still couldn't start with It failed differently this time: and the new cause's first line, then the new cause's fix and actions. Details hold the full error with Copy."
     },
     {
       "id": "acp.empty-state-not-running",
@@ -4889,12 +4841,8 @@
       "kind": "vitest",
       "risk": "low",
       "specs": ["src/components/__tests__/ProjectsSection.test.tsx", "src/lib/__tests__/registeredProjects.test.ts"],
-      "components": [
-        "web/src/components/ProjectsSection.tsx",
-        "web/src/lib/registeredProjects.ts",
-        "web/src/lib/sidebarAxis.ts"
-      ],
-      "notes": "Where the grouping draws repository headers (By repo, By organization, By repo and group) the section is \"Projects, no sessions\" and lists unpinned Projects without a live group; By group draws none, so it is \"Projects\" and lists every registered Project once, pinned or with live sessions included, a pinned row marked ◆ (#5065). Compact is \"Projects\" on every axis. The per-axis rule is axisDrawsRepoHeaders, a Record over SidebarAxis."
+      "components": ["web/src/components/ProjectsSection.tsx", "web/src/lib/registeredProjects.ts"],
+      "notes": "Under Repository the section is \"Projects, no sessions\" and lists unpinned Projects without a live group; My groups draws no repository headers, so it is \"Projects\" and lists every registered Project once, pinned or with live sessions included, a pinned row marked ◆ (#5065). Compact is \"Projects\" under either grouping."
     },
     {
       "id": "story.settings-paired-terminal-sizing",
@@ -5078,7 +5026,7 @@
         "web/src/components/sidebar/GroupLists.tsx",
         "web/src/components/sidebar/keyboardNav.ts"
       ],
-      "notes": "Arrow keys over headers and rows on every axis, including nested and org lists; Left on a collapsed nested header goes to its parent; the Snoozed & archived toggle is a header for its rows; Archive all that empties a Group moves focus to the nearest remaining Group header, never the toggle, and not after focus moved elsewhere."
+      "notes": "Arrow keys over headers and rows under both groupings, including Repository's nested Groups; Left on a collapsed nested header goes to its parent; the Snoozed & archived toggle is a header for its rows; Archive all that empties a Group moves focus to the nearest remaining Group header, never the toggle, and not after focus moved elsewhere."
     },
     {
       "id": "story.sidebar-plan-progress",

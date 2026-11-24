@@ -1,5 +1,6 @@
-// Sidebar grouping axes (#1220, #1234, #1720, #3283): repo, group, nested repo+group, and org buckets with
-// per-axis collapse persisted in localStorage. Bucketing is unit-tested in src/lib/__tests__/sidebarGroups.test.ts.
+// Sidebar groupings (#1220, #1234, #1720, #5896): Repository, with the user's Groups nested under each repository
+// header, and My groups, picked in the shared view menu, with per-grouping collapse persisted in localStorage.
+// Bucketing is unit-tested in src/lib/__tests__/sidebarGroups.test.ts.
 
 import { test, expect } from "./helpers/mockedTest";
 import type { Locator, Page, Route } from "@playwright/test";
@@ -9,7 +10,7 @@ import { launch, mockWizardApis, sessionStub, wizard } from "./helpers/wizard";
 
 const HEADER = "[data-testid='sidebar-group-header']";
 const ROW = "[data-testid='sidebar-session-row']";
-const AXIS_TOGGLE = "[data-testid='sidebar-axis-toggle']";
+const VIEW_TOGGLE = "[data-testid='sidebar-view-toggle']";
 
 function twoRepoSessions(): MockSessionInput[] {
   return [
@@ -33,45 +34,6 @@ function nestedSessions(): MockSessionInput[] {
     { id: "s-x1", title: "fix-one", project_path: "/tmp/project", branch: "fix/one", group: "fix" },
     { id: "s-l1", title: "loose-one", project_path: "/tmp/project", branch: "loose/one" },
   ];
-}
-
-function orgSessions(): MockSessionInput[] {
-  return [
-    { id: "s-a", title: "alpha-session", project_path: "/tmp/repo-alpha", branch: "feat/a", remote_owner: "acme" },
-    { id: "s-b", title: "beta-session", project_path: "/tmp/repo-beta", branch: "feat/b", remote_owner: "acme" },
-    { id: "s-c", title: "gamma-session", project_path: "/tmp/repo-gamma", branch: "feat/c", remote_owner: null },
-  ];
-}
-
-function statusSessions(): MockSessionInput[] {
-  return [
-    {
-      id: "s-idle",
-      title: "idle-session",
-      project_path: "/tmp/project",
-      branch: "feat/idle",
-      fields: { status: "Idle" },
-    },
-    {
-      id: "s-waiting",
-      title: "waiting-session",
-      project_path: "/tmp/project",
-      branch: "feat/waiting",
-      fields: { status: "Waiting" },
-    },
-    {
-      id: "s-running",
-      title: "running-session",
-      project_path: "/tmp/project",
-      branch: "feat/running",
-      fields: { status: "Running" },
-    },
-  ];
-}
-
-// Stub owner avatars so the test makes no network request.
-async function stubOwnerAvatars(page: Page) {
-  await page.route("https://github.com/**", (r) => r.fulfill({ status: 404, body: "" }));
 }
 
 async function resolvedColor(page: Page, token: string): Promise<string> {
@@ -110,11 +72,10 @@ async function recordArchives(page: Page, ids: string[], sessions?: MockSessionI
   });
 }
 
-// The axis picker sets any axis directly, so status is one pick from the default.
-async function pickAxis(page: Page, toggle: Locator, target: string) {
+async function pickGrouping(page: Page, toggle: Locator, target: "project" | "group") {
   await toggle.click();
-  await page.getByTestId(`sidebar-axis-option-${target}`).click();
-  await expect(toggle).toHaveAttribute("data-axis", target);
+  await page.getByTestId(`sidebar-view-group-${target}`).click();
+  await expect(toggle).toHaveAttribute("data-group-by", target);
 }
 
 test.describe("sidebar repo groups (#1220)", () => {
@@ -171,25 +132,23 @@ test.describe("sidebar repo groups (#1220)", () => {
   });
 });
 
-test.describe("sidebar user-group axis (#1234)", () => {
-  test("axis toggle renders user groups by group_path; their collapse persists across reload per axis", async ({
+test.describe("sidebar My groups (#1234)", () => {
+  test("My groups renders user groups by group_path; the pick and their collapse persist across reload", async ({
     page,
   }) => {
-    await installSidebarMocks(page, { sessions: groupedSessions() });
+    const mocks = await installSidebarMocks(page, { sessions: groupedSessions() });
     await gotoDesktop(page);
 
     const headers = page.locator(HEADER);
-    await expect(headers).toHaveCount(1);
+    // One repository header with the two Groups nested inside it.
+    await expect(headers).toHaveCount(3);
     await expect(page.locator(ROW)).toHaveCount(3);
 
-    const axisHeading = page.getByTestId("sidebar-axis-heading");
-    await expect(axisHeading).toHaveText("Sessions");
-
-    const axisToggle = page.locator(AXIS_TOGGLE);
-    await expect(axisToggle).toHaveAttribute("data-axis", "repo");
-    await pickAxis(page, axisToggle, "group");
-    await expect(axisToggle).toHaveAttribute("data-axis", "group");
-    await expect(axisHeading).toHaveText("Groups");
+    const viewToggle = page.locator(VIEW_TOGGLE);
+    await expect(viewToggle).toHaveText(/Repository.*Custom/);
+    await pickGrouping(page, viewToggle, "group");
+    await expect(viewToggle).toHaveText(/My groups.*Custom/);
+    expect(mocks.viewPatches).toEqual([{ group_by: "group" }]);
 
     await expect(headers).toHaveCount(2);
     await expect(page.locator(`${HEADER}[data-group-id='feature']`)).toBeVisible();
@@ -204,13 +163,16 @@ test.describe("sidebar user-group axis (#1234)", () => {
     await expect(featureExpand).toHaveAttribute("aria-expanded", "false");
     await expect(page.getByText("feat-one")).toBeHidden();
 
+    // The grouping comes back from the Daemon, the collapse from this browser.
     await page.reload();
-    await expect(axisToggle).toHaveAttribute("data-axis", "group");
+    await expect(viewToggle).toHaveAttribute("data-group-by", "group");
     await expect(featureHeader.locator("button[aria-expanded]")).toHaveAttribute("aria-expanded", "false");
 
-    // Collapse maps are per axis; the picker switches straight back to repo.
-    await pickAxis(page, axisToggle, "repo");
-    await expect(page.locator(`${HEADER} button[aria-expanded]`)).toHaveAttribute("aria-expanded", "true");
+    // Collapse maps are per grouping.
+    await pickGrouping(page, viewToggle, "project");
+    for (const expand of await page.locator(`${HEADER} button[aria-expanded]`).all()) {
+      await expect(expand).toHaveAttribute("aria-expanded", "true");
+    }
   });
 });
 
@@ -224,7 +186,7 @@ test.describe("sidebar group header + (#5498)", () => {
     });
     await page.addInitScript(() => localStorage.setItem("aoe-new-session-last-project", "/tmp/remembered"));
     await gotoDesktop(page);
-    await pickAxis(page, page.locator(AXIS_TOGGLE), "group");
+    await pickGrouping(page, page.locator(VIEW_TOGGLE), "group");
 
     await page
       .locator(`${HEADER}[data-group-id='feature']`)
@@ -239,25 +201,23 @@ test.describe("sidebar group header + (#5498)", () => {
   });
 });
 
-test.describe("sidebar nested repo+group axis (#1720)", () => {
+test.describe("sidebar Repository grouping (#1720)", () => {
   test("nests user groups inside the repo block; subgroup collapse is independent of repo collapse and persists", async ({
     page,
   }) => {
     await installSidebarMocks(page, { sessions: nestedSessions() });
     await gotoDesktop(page);
 
-    const axisToggle = page.locator(AXIS_TOGGLE);
-    await expect(axisToggle).toHaveAttribute("data-axis", "repo");
-    await pickAxis(page, axisToggle, "repo+group");
-
     const repoBlocks = page.locator("[data-testid='sidebar-nested-repo']");
     await expect(repoBlocks).toHaveCount(1);
     const repo = repoBlocks.first();
 
-    await expect(repo.locator("[data-testid='sidebar-nested-subgroup']")).toHaveCount(3);
+    await expect(repo.locator("[data-testid='sidebar-nested-subgroup']")).toHaveCount(2);
     await expect(repo.locator("[data-testid='sidebar-nested-subgroup'] [data-group-id='feature']")).toBeVisible();
     await expect(repo.locator("[data-testid='sidebar-nested-subgroup'] [data-group-id='fix']")).toBeVisible();
-    await expect(repo.locator("[data-testid='sidebar-nested-subgroup'] [data-group-id='__ungrouped__']")).toBeVisible();
+    // A session in no Group sits straight under the repository header, above the Groups.
+    await expect(repo.locator("[data-group-id='__ungrouped__']")).toHaveCount(0);
+    await expect(repo.locator(ROW).first()).toContainText("loose-one");
 
     await expect(page.locator(ROW)).toHaveCount(4);
 
@@ -271,7 +231,6 @@ test.describe("sidebar nested repo+group axis (#1720)", () => {
     await expect(page.getByText("fix-one")).toBeVisible();
 
     await page.reload();
-    await expect(axisToggle).toHaveAttribute("data-axis", "repo+group");
     await expect(
       page
         .locator("[data-testid='sidebar-nested-subgroup'] [data-group-id='feature']")
@@ -295,7 +254,6 @@ test.describe("sidebar nested repo+group axis (#1720)", () => {
     await installSidebarMocks(page, { sessions });
     await recordArchives(page, archived, sessions);
     await gotoDesktop(page);
-    await pickAxis(page, page.locator(AXIS_TOGGLE), "repo+group");
 
     // Hide repo B's row, then range from A to C across it.
     const repoB = page.locator("[data-testid='sidebar-nested-repo'][data-repo-id='/tmp/repo-b']");
@@ -313,91 +271,49 @@ test.describe("sidebar nested repo+group axis (#1720)", () => {
   });
 });
 
-test.describe("sidebar status axis (#4867)", () => {
-  test("groups sessions by execution status in attention order; collapse persists and stays per axis", async ({
-    page,
-  }) => {
-    await installSidebarMocks(page, { sessions: statusSessions() });
+test.describe("sidebar view menu and My groups slices (#5896)", () => {
+  test("the view menu follows the menu-button pattern: focus on open, arrows, Escape and Tab-out", async ({ page }) => {
+    await installSidebarMocks(page, { sessions: twoRepoSessions() });
     await gotoDesktop(page);
 
-    const axisToggle = page.locator(AXIS_TOGGLE);
-    const axisHeading = page.getByTestId("sidebar-axis-heading");
-    await expect(axisToggle).toHaveAttribute("data-axis", "repo");
-    await expect(page.locator(ROW)).toHaveCount(3);
-
-    await pickAxis(page, axisToggle, "status");
-    await expect(axisToggle).toHaveAttribute("data-axis", "status");
-    await expect(axisHeading).toHaveText("Status");
-
-    const headers = page.locator(HEADER);
-    await expect(headers).toHaveCount(3);
-    // The Attention sort's order: Waiting, then Idle, then Running.
-    await expect(headers.nth(0)).toHaveAttribute("data-group-id", "status:Waiting");
-    await expect(headers.nth(1)).toHaveAttribute("data-group-id", "status:Idle");
-    await expect(headers.nth(2)).toHaveAttribute("data-group-id", "status:Running");
-    await expect(page.locator(ROW)).toHaveCount(3);
-
-    const waitingExpand = page.locator(`${HEADER}[data-group-id='status:Waiting']`).locator("button[aria-expanded]");
-    await waitingExpand.click();
-    await expect(waitingExpand).toHaveAttribute("aria-expanded", "false");
-    await expect(page.getByText("waiting-session")).toBeHidden();
-    await expect(page.getByText("running-session")).toBeVisible();
-
-    await page.reload();
-    await expect(axisToggle).toHaveAttribute("data-axis", "status");
-    await expect(
-      page.locator(`${HEADER}[data-group-id='status:Waiting']`).locator("button[aria-expanded]"),
-    ).toHaveAttribute("aria-expanded", "false");
-
-    // Collapse keys are per axis; the repo header never collapsed.
-    await pickAxis(page, axisToggle, "repo");
-    await expect(page.locator(`${HEADER} button[aria-expanded]`)).toHaveAttribute("aria-expanded", "true");
-  });
-
-  test("the picker follows the menu-button pattern: focus on open, arrows, Escape and Tab-out", async ({ page }) => {
-    await installSidebarMocks(page, { sessions: statusSessions() });
-    await gotoDesktop(page);
-
-    const axisToggle = page.locator(AXIS_TOGGLE);
-    const menu = page.getByTestId("sidebar-axis-menu");
-    const option = (target: string) => page.getByTestId(`sidebar-axis-option-${target}`);
-    await axisToggle.focus();
+    const viewToggle = page.locator(VIEW_TOGGLE);
+    const menu = page.getByTestId("sidebar-view-menu");
+    const item = (testId: string) => page.getByTestId(testId);
+    await viewToggle.focus();
     await page.keyboard.press("Enter");
 
     await expect(menu).toBeVisible();
-    await expect(option("group")).toHaveText("Group");
-    // Same single-select menu semantics as the sort picker beside it.
     await expect(menu).toHaveAttribute("role", "menu");
-    await expect(option("repo")).toHaveAttribute("role", "menuitemradio");
-    // Focus enters on the checked option, and the menu owns the arrows, so options are not Tab stops.
-    await expect(option("repo")).toBeFocused();
-    await expect(option("repo")).toHaveAttribute("tabindex", "-1");
+    await expect(item("sidebar-view-group-project")).toHaveAttribute("role", "menuitemradio");
+    // Focus enters on the checked grouping, and the menu owns the arrows, so items are not Tab stops.
+    await expect(item("sidebar-view-group-project")).toBeFocused();
+    await expect(item("sidebar-view-group-project")).toHaveAttribute("tabindex", "-1");
 
     await page.keyboard.press("ArrowDown");
-    await expect(option("org")).toBeFocused();
+    await expect(item("sidebar-view-group-group")).toBeFocused();
     await page.keyboard.press("End");
-    await expect(option("status")).toBeFocused();
+    await expect(item("sidebar-view-reset-order")).toBeFocused();
     // Both ends wrap.
     await page.keyboard.press("ArrowDown");
-    await expect(option("repo")).toBeFocused();
+    await expect(item("sidebar-view-group-project")).toBeFocused();
     await page.keyboard.press("ArrowUp");
-    await expect(option("status")).toBeFocused();
+    await expect(item("sidebar-view-reset-order")).toBeFocused();
     await page.keyboard.press("Home");
-    await expect(option("repo")).toBeFocused();
+    await expect(item("sidebar-view-group-project")).toBeFocused();
 
     // Escape closes without picking and hands the focus back to the trigger.
     await page.keyboard.press("Escape");
     await expect(menu).toBeHidden();
-    await expect(axisToggle).toBeFocused();
-    await expect(axisToggle).toHaveAttribute("data-axis", "repo");
+    await expect(viewToggle).toBeFocused();
+    await expect(viewToggle).toHaveAttribute("data-group-by", "project");
 
-    // Enter on an arrowed-to option commits it, and the trigger keeps the focus.
+    // Enter on an arrowed-to item commits it, and the trigger keeps the focus.
     await page.keyboard.press("Enter");
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Enter");
     await expect(menu).toBeHidden();
-    await expect(axisToggle).toHaveAttribute("data-axis", "org");
-    await expect(axisToggle).toBeFocused();
+    await expect(viewToggle).toHaveAttribute("data-group-by", "group");
+    await expect(viewToggle).toBeFocused();
 
     // Tabbing out closes the menu instead of walking its options.
     await page.keyboard.press("Enter");
@@ -406,14 +322,15 @@ test.describe("sidebar status axis (#4867)", () => {
     await expect(menu).toBeHidden();
   });
 
-  test("bulk archive targets each selected row's own session when one workspace straddles two buckets", async ({
+  test("bulk archive targets each selected row's own session when one workspace straddles two Groups", async ({
     page,
   }) => {
-    // One workspace with a Waiting and a Running session: the status axis renders it twice, and the
-    // Waiting bucket sorts first, so the workspace id alone resolves to the Waiting session.
+    // One workspace with a session in each of two Groups: My groups renders it twice, and the
+    // alpha Group sorts first, so the workspace id alone resolves to its session.
     const sessions: MockSessionInput[] = [
       {
         id: "s-wait",
+        group: "alpha",
         title: "wait-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -421,6 +338,7 @@ test.describe("sidebar status axis (#4867)", () => {
       },
       {
         id: "s-run",
+        group: "beta",
         title: "run-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -438,7 +356,7 @@ test.describe("sidebar status axis (#4867)", () => {
     await installSidebarMocks(page, { sessions });
     await recordArchives(page, archived, sessions);
     await gotoDesktop(page);
-    await pickAxis(page, page.locator(AXIS_TOGGLE), "status");
+    await pickGrouping(page, page.locator(VIEW_TOGGLE), "group");
 
     await expect(page.getByText("wait-session")).toBeVisible();
     // Cmd rather than Ctrl: Chromium on macOS reads Ctrl+click as a secondary click.
@@ -454,10 +372,11 @@ test.describe("sidebar status axis (#4867)", () => {
     expect([...archived].sort()).toEqual(["s-other", "s-run"]);
   });
 
-  test("a workspace split across buckets marks only the slice showing the active session", async ({ page }) => {
+  test("a workspace split across Groups marks only the slice showing the active session", async ({ page }) => {
     const sessions: MockSessionInput[] = [
       {
         id: "s-wait",
+        group: "alpha",
         title: "wait-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -465,6 +384,7 @@ test.describe("sidebar status axis (#4867)", () => {
       },
       {
         id: "s-run",
+        group: "beta",
         title: "run-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -473,21 +393,22 @@ test.describe("sidebar status axis (#4867)", () => {
     ];
     await installSidebarMocks(page, { sessions });
     await gotoDesktop(page);
-    await pickAxis(page, page.locator(AXIS_TOGGLE), "status");
+    await pickGrouping(page, page.locator(VIEW_TOGGLE), "group");
 
     await page.locator(ROW).filter({ hasText: "run-session" }).click();
     await expect(page).toHaveURL(/\/session\/s-run/);
-    // Both slices share the workspace id, but only the Running one shows the open session.
+    // Both slices share the workspace id, but only the beta one shows the open session.
     const active = page.locator("[data-active-session-row]");
     await expect(active).toHaveCount(1);
     await expect(active).toContainText("run-session");
   });
 
-  test("a range across the footer selects each workspace once, not its hidden status slices", async ({ page }) => {
+  test("a range across the footer selects each workspace once, not its hidden Group slices", async ({ page }) => {
     const archivedUntil = { archived_at: "2026-01-01T00:00:00Z" };
     const sessions: MockSessionInput[] = [
       {
         id: "s-w1-waiting",
+        group: "alpha",
         title: "w1-waiting",
         project_path: "/tmp/w1",
         branch: "feat/w1",
@@ -495,6 +416,7 @@ test.describe("sidebar status axis (#4867)", () => {
       },
       {
         id: "s-w1-running",
+        group: "beta",
         title: "w1-running",
         project_path: "/tmp/w1",
         branch: "feat/w1",
@@ -502,6 +424,7 @@ test.describe("sidebar status axis (#4867)", () => {
       },
       {
         id: "s-w2-idle",
+        group: "alpha",
         title: "w2-idle",
         project_path: "/tmp/w2",
         branch: "feat/w2",
@@ -512,10 +435,10 @@ test.describe("sidebar status axis (#4867)", () => {
     await installSidebarMocks(page, { sessions });
     await recordArchives(page, unarchived);
     await gotoDesktop(page);
-    await pickAxis(page, page.locator(AXIS_TOGGLE), "status");
+    await pickGrouping(page, page.locator(VIEW_TOGGLE), "group");
     await page.getByTestId("sidebar-sunk-toggle").click();
 
-    // One footer row per workspace: W1 is sliced into Waiting and Running buckets internally.
+    // One footer row per workspace: W1 is sliced into two Groups internally.
     const footerRows = page.locator(`[data-testid='sidebar-sunk-section'] ${ROW}`);
     await expect(footerRows).toHaveCount(2);
 
@@ -528,10 +451,11 @@ test.describe("sidebar status axis (#4867)", () => {
     expect([...unarchived].sort()).toEqual(["s-w1-waiting", "s-w2-idle"]);
   });
 
-  test("snoozing one status slice leaves its sibling row and bulk eligibility alone", async ({ page }) => {
+  test("snoozing one Group slice leaves its sibling row and bulk eligibility alone", async ({ page }) => {
     const sessions: MockSessionInput[] = [
       {
         id: "s-wait",
+        group: "alpha",
         title: "wait-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -539,6 +463,7 @@ test.describe("sidebar status axis (#4867)", () => {
       },
       {
         id: "s-run",
+        group: "beta",
         title: "run-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -556,7 +481,7 @@ test.describe("sidebar status axis (#4867)", () => {
       });
     });
     await gotoDesktop(page);
-    await pickAxis(page, page.locator(AXIS_TOGGLE), "status");
+    await pickGrouping(page, page.locator(VIEW_TOGGLE), "group");
 
     const waitingRow = page.locator(ROW).filter({ hasText: "wait-session" });
     const runningRow = page.locator(ROW).filter({ hasText: "run-session" });
@@ -565,7 +490,7 @@ test.describe("sidebar status axis (#4867)", () => {
     await page.getByTestId("snooze-modal-preset-60").click();
     await expect.poll(() => snoozed).toEqual(["s-run"]);
 
-    // Only the Running row carries the pending snooze.
+    // Only the beta row carries the pending snooze.
     await expect(runningRow.getByLabel("Snoozed")).toBeVisible();
     await expect(waitingRow.getByLabel("Snoozed")).toHaveCount(0);
 
@@ -579,10 +504,11 @@ test.describe("sidebar status axis (#4867)", () => {
     await expect(page.getByText("Snooze 1", { exact: true })).toBeVisible();
   });
 
-  test("archiving one status slice leaves its sibling slice's own pending action alone", async ({ page }) => {
+  test("archiving one Group slice leaves its sibling slice's own pending action alone", async ({ page }) => {
     const sessions: MockSessionInput[] = [
       {
         id: "s-wait",
+        group: "alpha",
         title: "wait-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -590,6 +516,7 @@ test.describe("sidebar status axis (#4867)", () => {
       },
       {
         id: "s-run",
+        group: "beta",
         title: "run-session",
         project_path: "/tmp/shared",
         branch: "feat/shared",
@@ -611,14 +538,14 @@ test.describe("sidebar status axis (#4867)", () => {
     await page.route("**/api/sessions/*/archive", hold);
     await page.route("**/api/sessions/*/unread", hold);
     await gotoDesktop(page);
-    await pickAxis(page, page.locator(AXIS_TOGGLE), "status");
+    await pickGrouping(page, page.locator(VIEW_TOGGLE), "group");
 
     const row = (title: string) => page.locator(ROW).filter({ hasText: title });
     await row("wait-session").click({ button: "right" });
     await page.getByTestId("sidebar-context-menu-archive").click();
     await expect(row("wait-session").getByTitle("Archived")).toBeVisible();
 
-    // The sibling's action must not claim the Waiting slice's pending archive.
+    // The sibling's action must not claim the alpha slice's pending archive.
     await row("run-session").click({ button: "right" });
     await page.getByTestId("sidebar-context-menu-unread").click();
     await expect.poll(() => patched.length).toBe(2);
@@ -636,54 +563,5 @@ test.describe("sidebar status axis (#4867)", () => {
 
     release();
     await expect.poll(() => [...patched].sort()).toEqual(["s-run:unread", "s-wait:archive"]);
-  });
-});
-
-test.describe("sidebar org axis (#3283)", () => {
-  test("buckets repos by remote owner, No organization last; repo collapse within an org persists independently", async ({
-    page,
-  }) => {
-    await stubOwnerAvatars(page);
-    await installSidebarMocks(page, { sessions: orgSessions() });
-    await gotoDesktop(page);
-
-    const axisToggle = page.locator(AXIS_TOGGLE);
-    await expect(axisToggle).toHaveAttribute("data-axis", "repo");
-    await pickAxis(page, axisToggle, "org");
-
-    const orgBlocks = page.locator("[data-testid='sidebar-org-group']");
-    await expect(orgBlocks).toHaveCount(2);
-
-    const acmeOrg = page.locator("[data-testid='sidebar-org-group'][data-org-id='acme@example.com']");
-    await expect(acmeOrg.locator(HEADER).first()).toContainText("acme");
-    await expect(acmeOrg.locator("[data-testid='sidebar-org-repo']")).toHaveCount(2);
-
-    const noOrg = page.locator("[data-testid='sidebar-org-group'][data-org-id='__no_org__']");
-    await expect(noOrg.locator(HEADER).first()).toContainText("No organization");
-    await expect(noOrg.locator("[data-testid='sidebar-org-repo']")).toHaveCount(1);
-
-    await expect(orgBlocks.nth(0)).toHaveAttribute("data-org-id", "acme@example.com");
-    await expect(orgBlocks.nth(1)).toHaveAttribute("data-org-id", "__no_org__");
-
-    await expect(page.locator(ROW)).toHaveCount(3);
-
-    const alphaRepo = acmeOrg.locator("[data-testid='sidebar-org-repo'][data-repo-id='/tmp/repo-alpha']");
-    const alphaExpand = alphaRepo.locator("button[aria-expanded]");
-    await expect(alphaExpand).toHaveAttribute("aria-expanded", "true");
-
-    await alphaExpand.click();
-    await expect(alphaExpand).toHaveAttribute("aria-expanded", "false");
-    await expect(page.getByText("alpha-session")).toBeHidden();
-    await expect(page.getByText("beta-session")).toBeVisible();
-
-    await page.reload();
-    await expect(axisToggle).toHaveAttribute("data-axis", "org");
-    await expect(
-      page.locator("[data-testid='sidebar-org-repo'][data-repo-id='/tmp/repo-alpha']").locator("button[aria-expanded]"),
-    ).toHaveAttribute("aria-expanded", "false");
-
-    const orgHeader = acmeOrg.locator(HEADER).first();
-    await orgHeader.locator("button[aria-expanded]").click();
-    await expect(acmeOrg.locator("[data-testid='sidebar-org-repo']")).toHaveCount(0);
   });
 });

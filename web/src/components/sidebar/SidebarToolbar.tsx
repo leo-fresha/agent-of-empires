@@ -1,81 +1,80 @@
 import { ListFilter } from "lucide-react";
-import type { SidebarAxis } from "../../lib/sidebarAxis";
-import type { SidebarSortMode } from "../../lib/sidebarSort";
 import { toneTextClass, type PluginFacetSpec, type PluginSortSpec } from "../../lib/pluginUi";
+import type { SidebarGroupBy, SidebarSort } from "../../lib/sidebarView";
 import { OFFLINE_TITLE } from "../../lib/connectionState";
-import { SidebarAxisPicker } from "../SidebarAxisPicker";
-import { SidebarSortPicker } from "../SidebarSortPicker";
 import { Tooltip } from "../Tooltip";
 import { DISABLED_ICON_BUTTON, TOOLBAR_BUTTON, TOOLBAR_TINT } from "./styles";
 import { StrokeIcon } from "../icons";
 import { SidebarLegend } from "./SidebarLegend";
+import { SidebarViewMenu } from "./SidebarViewMenu";
 
 type PluginSortRef = { pluginId: string; entryId: string };
 
-/** Heading above the list; the picker labels its axes itself. */
-const AXIS_HEADING: Record<SidebarAxis, string> = {
-  repo: "Sessions",
-  org: "Sessions",
-  group: "Groups",
-  "repo+group": "Sessions",
-  status: "Status",
-};
-
 export function SidebarToolbar({
   compact,
-  axis,
-  onAxisChange,
-  sortMode,
-  onSortModeChange,
+  groupBy,
+  sort,
+  onGroupByChange,
+  onSortChange,
+  onResetCustomOrder,
   pluginSorts,
   pluginSortRef,
   onPluginSortChange,
+  readOnly,
   hasFacets,
   facetsActive,
   facetOpen,
   onToggleFacets,
   filterOpen,
+  filterActive,
   onToggleFilter,
   offline,
   onNew,
   onClose,
 }: {
   compact: boolean;
-  axis: SidebarAxis;
-  onAxisChange: (axis: SidebarAxis) => void;
-  sortMode: SidebarSortMode;
-  onSortModeChange: (mode: SidebarSortMode) => void;
+  groupBy: SidebarGroupBy;
+  sort: SidebarSort;
+  onGroupByChange: (groupBy: SidebarGroupBy) => void;
+  onSortChange: (sort: SidebarSort) => void;
+  onResetCustomOrder: () => void;
   pluginSorts: PluginSortSpec[];
   pluginSortRef: PluginSortRef | null;
   onPluginSortChange: (ref: PluginSortRef) => void;
+  readOnly?: boolean;
   hasFacets: boolean;
   facetsActive: boolean;
   facetOpen: boolean;
   onToggleFacets: () => void;
   filterOpen: boolean;
+  /** A filter applies while its panel is closed, such as Needs you. */
+  filterActive: boolean;
   onToggleFilter: () => void;
   offline: boolean;
   onNew: () => void;
   onClose: () => void;
 }) {
-  const axisHeading = AXIS_HEADING[axis];
+  const view = (
+    <SidebarViewMenu
+      compact={compact}
+      groupBy={groupBy}
+      sort={sort}
+      onGroupByChange={onGroupByChange}
+      onSortChange={onSortChange}
+      onResetCustomOrder={onResetCustomOrder}
+      pluginSorts={pluginSorts}
+      pluginSortRef={pluginSortRef}
+      onPluginSortChange={onPluginSortChange}
+      readOnly={readOnly}
+    />
+  );
   return (
     <div className={`${compact ? "px-1" : "px-3"} pt-3 pb-1 flex items-center`}>
+      {view}
       {compact ? (
         <span className="flex-1" />
       ) : (
         <>
-          <span data-testid="sidebar-axis-heading" className="text-sm text-text-muted flex-1">
-            {axisHeading}
-          </span>
-          <SidebarAxisPicker axis={axis} onAxisChange={onAxisChange} />
-          <SidebarSortPicker
-            sortMode={sortMode}
-            onSortModeChange={onSortModeChange}
-            pluginSorts={pluginSorts}
-            pluginSortRef={pluginSortRef}
-            onPluginSortChange={onPluginSortChange}
-          />
           {hasFacets && (
             <Tooltip text="Plugin facets">
               <button
@@ -96,8 +95,10 @@ export function SidebarToolbar({
           <Tooltip text="Filter">
             <button
               onClick={onToggleFilter}
-              className={`${TOOLBAR_BUTTON} ${TOOLBAR_TINT(filterOpen, "text-text-secondary")}`}
+              className={`relative ${TOOLBAR_BUTTON} ${TOOLBAR_TINT(filterOpen || filterActive, filterActive ? "text-brand-500" : "text-text-secondary")}`}
               aria-label="Filter sessions"
+              aria-expanded={filterOpen}
+              data-testid="sidebar-filter-toggle"
             >
               <StrokeIcon size={14} strokeWidth="2">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
