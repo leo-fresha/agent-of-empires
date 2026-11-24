@@ -7,7 +7,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
-        - 'dtolnay/rust-toolchain@stable'
+        - 'dtolnay/rust-toolchain@master'
     '.github/workflows/cachix-push.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/github-script@v9.0.0'
@@ -21,7 +21,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
-        - 'dtolnay/rust-toolchain@stable'
+        - 'dtolnay/rust-toolchain@master'
         - 'embarkstudios/cargo-deny-action@v2.1.1'
         - 'kunobi-ninja/kache-action@v1'
         - 'nixbuild/nix-quick-install-action@v35'
@@ -45,13 +45,13 @@ workflows:
         - 'actions/deploy-pages@v5.0.1'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-pages-artifact@v5.0.0'
-        - 'dtolnay/rust-toolchain@stable'
+        - 'dtolnay/rust-toolchain@master'
     '.github/workflows/e2e-recording.yml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
-        - 'dtolnay/rust-toolchain@stable'
+        - 'dtolnay/rust-toolchain@master'
         - 'runs-on/action@v2.6.0'
     '.github/workflows/needs-triage.yml': []
     '.github/workflows/nightly.yml':
@@ -72,7 +72,7 @@ workflows:
     '.github/workflows/release-plz.yml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
-        - 'dtolnay/rust-toolchain@stable'
+        - 'dtolnay/rust-toolchain@master'
         - 'release-plz/action@v0.5.148'
     '.github/workflows/release.yml':
         - 'actions/checkout@v7.0.1'
@@ -90,7 +90,7 @@ workflows:
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'codecov/codecov-action@v7.1.1'
         - 'codecov/test-results-action@v1.2.1'
-        - 'dtolnay/rust-toolchain@stable'
+        - 'dtolnay/rust-toolchain@master'
         - 'kunobi-ninja/kache-action@v1'
         - 'runs-on/action@v2.6.0'
         - 'taiki-e/install-action@v2.88.0'
@@ -211,9 +211,9 @@ dependencies:
         commit: 'sha1-99012661954931238ded8c8b007157a8430204e1'
         owner_id: 5429470
         repo_id: 288487894
-    'dtolnay/rust-toolchain@stable':
-        ref: 'stable'
-        commit: 'sha1-39008827e6b4319a349e9a42dfc90579dd25f1ca'
+    'dtolnay/rust-toolchain@master':
+        ref: 'master'
+        commit: 'sha1-df2a88e9fe4098bad09cb42c3dec7187f15861fc'
         owner_id: 1940490
         repo_id: 260749683
     'embarkstudios/cargo-deny-action@v2.1.1':
