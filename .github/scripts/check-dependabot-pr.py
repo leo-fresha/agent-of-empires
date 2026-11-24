@@ -282,7 +282,7 @@ def check_actions(path, base_text, head_text, resolve_tag, lock):
         if not (old_tag and new_tag):
             problems.append(f"{path}: changes a line other than a tag-ref uses update")
             continue
-        name, ref = "/".join(new_tag.group(1).split("/")[:2]), new_tag.group(2)
+        name, ref = "/".join(new_tag.group(1).split("/")[:2]).lower(), new_tag.group(2)
         entry = lock[1].get(f"{name}@{ref}")
         if before.split("@", 1)[0] != after.split("@", 1)[0]:
             problems.append(f"{path}: changes an action or its step placement")
@@ -603,6 +603,7 @@ def self_test():
         wf_case("workflow tag bump", old_tag, new_tag, 0),
         wf_case("workflow tag bump with unchanged local action", old_tag + "      - uses: $/.github/actions/x\n", new_tag + "      - uses: $/.github/actions/x\n", 0),
         wf_case("workflow tag downgrade", new_tag, old_tag, 1, lock_text("v2.0.0", sha_a), lock_text()),
+        wf_case("workflow tag mixed-case owner", *(f"      - uses: EmbarkStudios/cargo-deny-action@{t}\n" for t in ("v1.0.0", "v2.0.0")), 0, *(lock_text(*a).replace("actions/checkout", "embarkstudios/cargo-deny-action") for a in ((), ("v2.0.0", sha_a)))),
         wf_case("workflow tag numeric-equal suffix", old_tag, old_tag.replace("v1.0.0", "v1.0.0-rc"), 1),
         wf_case("workflow tag to prerelease", old_tag, "      - uses: actions/checkout@v2.0.0-beta.1\n", 1, lock_text(), lock_text("v2.0.0-beta.1", sha_a)),
         wf_case("workflow release to prerelease", new_tag, "      - uses: actions/checkout@v2.0.0-beta.1\n", 1, lock_text("v2.0.0", sha_a), lock_text("v2.0.0-beta.1", sha_a)),
