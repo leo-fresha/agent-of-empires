@@ -471,6 +471,7 @@ function AppContent({
     repositoryOrder,
     sidebarView,
     changeOrdering,
+    orderingSaving,
     changeSidebarView,
     error,
     loaded: sessionsLoaded,
@@ -586,6 +587,7 @@ function AppContent({
     workspaceOrdering,
     repositoryOrder,
     changeOrdering,
+    orderingSaving,
     changeSidebarView,
   });
 

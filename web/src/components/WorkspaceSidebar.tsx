@@ -19,6 +19,7 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 import { TOUR_ANCHORS, tourAnchor } from "../lib/tourSteps";
 import { useServerDown } from "../lib/connectionState";
 import { workspaceAttentionCount } from "../lib/sidebarSort";
+import { useUnreadIndicatorEnabled } from "../lib/unreadIndicator";
 import { useSidebarTriage } from "../hooks/useSidebarTriage";
 import { sessionWorkspaces } from "../lib/sessionWorkspace";
 import { ProjectsSection } from "./ProjectsSection";
@@ -147,6 +148,7 @@ export function WorkspaceSidebar(props: Props) {
   // A momentary triage view of this browser, so it is in memory only and clears with the filter panel.
   const [needsYou, setNeedsYou] = useState(false);
   const pluginAttention = usePluginAttention();
+  const unreadCounts = useUnreadIndicatorEnabled();
   const filterRef = useRef<HTMLInputElement>(null);
   const [sunkExpanded, toggleSunkExpanded] = usePersistedFlag("aoe-sidebar-sunk-expanded", false);
   // The compact rail has no filter controls, so a query typed earlier stops applying without being cleared.
@@ -158,10 +160,12 @@ export function WorkspaceSidebar(props: Props) {
   const { matchesFacets } = facets;
   const [filteredGroups, filteredNested] = useMemo(() => {
     if (!hasFilter) return [groups, nestedGroups] as const;
-    const needs = activeNeedsYou ? (ws: Workspace) => workspaceAttentionCount(ws, pluginAttention) > 0 : undefined;
+    const needs = activeNeedsYou
+      ? (ws: Workspace) => workspaceAttentionCount(ws, pluginAttention, unreadCounts) > 0
+      : undefined;
     const keep = makeRowFilter(q, matchesFacets, needs);
     return [filterFlat(groups, keep), filterNested(nestedGroups, keep)] as const;
-  }, [hasFilter, activeNeedsYou, pluginAttention, q, matchesFacets, groups, nestedGroups]);
+  }, [hasFilter, activeNeedsYou, pluginAttention, unreadCounts, q, matchesFacets, groups, nestedGroups]);
   const isNested = groupBy === "project";
 
   // An expanded sibling keeps its own optimistic override, which has to reconcile against its one session,

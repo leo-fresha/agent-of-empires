@@ -91,14 +91,14 @@ Collapse state is tracked per grouping and is not shared with the TUI.
 
 **Sort**:
 
-- **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Rows and repository headers you never moved sit on top, newest first; Group headers stay in name order. The order is the one the TUI uses, stored in `workspace-ordering.json`.
-- **Name**: rows A to Z by title, headers by name, ignoring case. Dragging a row or header switches to Custom, starting from the order on screen, so only what you dragged moves.
-- **Reset to newest first** clears the Custom order for every Client.
+- **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Rows and repository headers you never moved sit on top, newest first; Group headers stay in name order. The order is the one the TUI uses, stored in `workspace-ordering.json`. While a move is saving, another drag is refused with "The last move is still saving".
+- **Name**: rows A to Z by title, headers by name, ignoring case. Dragging a row or header switches to Custom, starting from the order on screen, so only what you dragged moves; the "Sorted by Custom now" notice offers **Undo**.
+- **Reset to newest first** clears the Custom order for every Client; the "Custom order reset" notice offers **Undo**. Either Undo puts back the order from before, until the notice closes or the order or sort changes again.
 - Plugin sorts, when a plugin offers one, are listed below and apply only in this browser until you reload or pick another sort. Dragging is off while one applies.
 
 Pinned rows stay at the top of their header under every sort. The Multi-repo and Scratch headers stay at the bottom. Header drag is off while a filter is active, and every drag is off while a plugin facet filters the rows.
 
-The filter button opens a text filter and a **Needs you** toggle, which shows only the rows with a session waiting on you, in error, flagged urgent, or flagged by a plugin, under their headers, and hides the "Snoozed & archived" footer. Closing the filter clears both.
+The filter button opens a text filter and a **Needs you** toggle, which shows only the rows with a session waiting on you, in error, flagged urgent, flagged by a plugin, or finished and not yet seen (while the unread indicator is on), under their headers, and hides the "Snoozed & archived" footer. Closing the filter clears both.
 
 **Move to another group.** Right-click (long-press on touch) a session row and choose **More > Move to another group**. The dialog lists the profile's existing groups with the current one highlighted: pick one, or type a new path to create that group. **Remove from group** (or clearing the field) drops the session back to **Ungrouped**. With the list open, Enter picks the highlighted group and a second Enter saves; Escape closes the list, then the dialog. Group paths use `/` for hierarchy (e.g. `work/projects`). Hidden in read-only mode.
 
@@ -123,7 +123,7 @@ Under **More** in the same menu, **Show only this Session** reloads the window t
 
 Trashed sessions live behind the **Trash** control in the sidebar footer. Right-click a trashed row for **Open**, **Restore**, or **Delete permanently**. Like an archived session, a trashed one cannot start until it is restored.
 
-A session is never pinned and sunk at once, but the transitions are one-step in either direction: pinning a sunk row surfaces it, and a pinned row's menu still offers Archive, Snooze, and Ignore, any of which removes the pin (matching the TUI, no unpin-first needed). Bulk Archive and Snooze include pinned rows in the selection for the same reason. The "Snoozed & archived" section sits at the bottom and aggregates every sunk workspace, newest archived (or snoozed) first whatever the sidebar sort; collapsed by default, its state persists in localStorage. The triage menu entries are hidden in read-only mode.
+A session is never pinned and sunk at once, but the transitions are one-step in either direction: pinning a sunk row surfaces it, and a pinned row's menu still offers Archive, Snooze, and Ignore, any of which removes the pin (matching the TUI, no unpin-first needed). Bulk Archive and Snooze include pinned rows in the selection for the same reason. The "Snoozed & archived" section sits at the bottom and aggregates every sunk workspace whatever the sidebar sort: archived rows first, newest archived first, then snoozed rows, soonest to wake first; collapsed by default, its state persists in localStorage. The triage menu entries are hidden in read-only mode.
 
 ### Multi-select and bulk triage
 

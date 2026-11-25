@@ -1313,7 +1313,7 @@
       "risk": "medium",
       "specs": ["src/components/__tests__/Toasts.test.tsx"],
       "components": ["web/src/components/Toasts.tsx"],
-      "notes": "A timed toast (plain, session or link) lasts 6 s but pauses while hovered or focused, including focus moving between its own controls. It resumes once both are released and stays at least 2 s more. Action toasts never time out."
+      "notes": "A timed toast (plain, session or link) lasts 6 s but pauses while hovered or focused, including focus moving between its own controls. It resumes once both are released and stays at least 2 s more. Action toasts never time out. An info action toast (such as Undo) stays when its action returns false, and its caller can dismiss it."
     },
     {
       "id": "notifications.status-sounds",
@@ -1385,9 +1385,11 @@
         "src/components/__tests__/SidebarGroupHeader.test.tsx",
         "src/lib/__tests__/sidebarSort.test.ts",
         "src/hooks/__tests__/useCommandActions.test.tsx",
-        "src/lib/__tests__/shortcuts.test.ts"
+        "src/lib/__tests__/shortcuts.test.ts",
+        "src/hooks/__tests__/useAttentionJump.test.tsx"
       ],
-      "components": ["web/src/components/WorkspaceSidebar.tsx", "web/src/components/sidebar/RowBadges.tsx"]
+      "components": ["web/src/components/WorkspaceSidebar.tsx", "web/src/components/sidebar/RowBadges.tsx"],
+      "notes": "Header counts, the Needs you filter and jump-to-next count a session waiting, in error, urgent, plugin-flagged, or, while the unread indicator is on, finished and unseen."
     },
     {
       "id": "sidebar.group-expand",
@@ -2459,7 +2461,7 @@
       "risk": "low",
       "specs": ["src/components/sidebar/filterGroups.test.ts"],
       "components": ["web/src/components/sidebar/filterGroups.ts"],
-      "notes": "The Snoozed & archived footer lists Workspaces newest archived_at (or snoozed_until) first across every group, whatever the sidebar sort; ties keep group order."
+      "notes": "The Snoozed & archived footer lists archived Workspaces newest archived_at first, then snoozed ones soonest snoozed_until first, across every group whatever the sidebar sort; Shift+click ranges follow that order; ties keep group order."
     },
     {
       "id": "sidebar.group-reorder",
@@ -2823,7 +2825,7 @@
         "web/src/lib/sidebarView.ts",
         "web/src/lib/sidebarReorder.ts"
       ],
-      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom once that order saves, a write that never answers stops holding polls off, and Reset clears the shared Custom order."
+      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom once that order saves, a write that never answers stops holding polls off, and Reset clears the shared Custom order. Sort and grouping writes, and ordering writes, reach the Daemon one at a time in the order made; a drag while a move is saving is refused with \"The last move is still saving\". A drag-switch to Custom and Reset offer an Undo toast once saved that writes back the previous order and repositories (and Name), held while a write is saving and dropped by the next order or sort change."
     },
     {
       "id": "sidebar.plugin-sort-filter",
