@@ -470,6 +470,8 @@ function AppContent({
     workspaceOrdering,
     repositoryOrder,
     sidebarView,
+    groupOrder,
+    moveGroup,
     changeOrdering,
     orderingSaving,
     changeSidebarView,
@@ -586,6 +588,8 @@ function AppContent({
     view: sidebarView,
     workspaceOrdering,
     repositoryOrder,
+    groupOrder,
+    moveGroup,
     changeOrdering,
     orderingSaving,
     changeSidebarView,
@@ -2793,6 +2797,7 @@ function AppContent({
                 onToggleSubgroup={sidebar.toggleSubgroupCollapsed}
                 onMoveWorkspace={sidebar.moveWorkspace}
                 onMoveRepository={sidebar.moveRepository}
+                onMoveGroup={sidebar.moveGroupHeader}
                 activeId={activeWorkspace?.id ?? null}
                 activeSessionId={activeSessionId}
                 open={sidebarOpen}

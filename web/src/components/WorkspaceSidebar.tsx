@@ -71,6 +71,7 @@ interface Props {
   onToggleSubgroup: (repoId: string, groupPath: string) => void;
   onMoveWorkspace: DragOptions["onMoveWorkspace"];
   onMoveRepository: DragOptions["onMoveRepository"];
+  onMoveGroup: DragOptions["onMoveGroup"];
   activeId: string | null;
   /** The session the URL currently points at; lets an expanded sibling row tell it apart from the rest of its group. */
   activeSessionId: string | null;
@@ -274,6 +275,7 @@ export function WorkspaceSidebar(props: Props) {
     headersDisabled: rowsDisabled || hasFilter,
     onMoveWorkspace: props.onMoveWorkspace,
     onMoveRepository: props.onMoveRepository,
+    onMoveGroup: props.onMoveGroup,
     dragClickGuard,
   };
 

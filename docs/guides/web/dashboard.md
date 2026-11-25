@@ -91,8 +91,8 @@ Collapse state is tracked per grouping and is not shared with the TUI.
 
 **Sort**:
 
-- **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Rows and repository headers you never moved sit on top, newest first; Group headers stay in name order. The order is the one the TUI uses, stored in `workspace-ordering.json`. While a move is saving, another drag is refused with "The last move is still saving".
-- **Name**: rows A to Z by title, headers by name, ignoring case. Dragging a row or header switches to Custom, starting from the order on screen, so only what you dragged moves; the "Sorted by Custom now" notice offers **Undo**.
+- **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Press and drag a Group header to move it among the Groups that share its parent; it keeps the order the TUI uses for that profile's Groups, and ones never arranged follow by name. Rows and repository headers you never moved sit on top, newest first. The order is the one the TUI uses, stored in `workspace-ordering.json` and, for Groups, each profile's `groups.json`. While a move is saving, another drag is refused with "The last move is still saving".
+- **Name**: rows A to Z by title, headers by name, ignoring case. Dragging a row or repository header switches to Custom, starting from the order on screen, so only what you dragged moves; the "Sorted by Custom now" notice offers **Undo**. Dragging a Group header moves nothing and says "Pick Custom to arrange groups".
 - **Reset to newest first** clears the Custom order for every Client; the "Custom order reset" notice offers **Undo**. Either Undo puts back the order from before, until the notice closes or the order or sort changes again.
 - Plugin sorts, when a plugin offers one, are listed below and apply only in this browser until you reload or pick another sort. Dragging is off while one applies.
 
