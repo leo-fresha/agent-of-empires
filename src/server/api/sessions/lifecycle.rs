@@ -59,62 +59,6 @@ pub async fn update_session_pin(
     crate::server::runtime::session_mutation_response(&state, &id, None::<()>).await
 }
 
-pub async fn update_session_favorite(
-    State(state): State<Arc<AppState>>,
-    Path(id): Path<String>,
-    body: Result<Json<UpdateFavoriteBody>, axum::extract::rejection::JsonRejection>,
-) -> impl IntoResponse {
-    if state.read_only {
-        return crate::server::api::read_only_response();
-    }
-    let Json(body) = match body {
-        Ok(body) => body,
-        Err(rejection) => return rejection.into_response(),
-    };
-
-    let namespace = state.profile_namespace.read().await;
-    let lock = state.instance_lock(&id).await;
-    let guard = lock.lock().await;
-    if let Some(response) = cityhall_block_non_structured(&state, &id).await {
-        return response;
-    }
-    let profile = {
-        let instances = state.instances.read().await;
-        let Some(instance) = instances.iter().find(|instance| instance.id == id) else {
-            return crate::server::api::session_not_found();
-        };
-        instance.source_profile.clone()
-    };
-    let favorited = body.favorited;
-    let persist_id = id.clone();
-    let committed = commit_profile_update(
-        &state,
-        profile,
-        "favorite update",
-        move |instances| {
-            if let Some(instance) = instances
-                .iter_mut()
-                .find(|instance| instance.id == persist_id)
-            {
-                if body.favorited {
-                    instance.favorite();
-                } else {
-                    instance.unfavorite();
-                }
-            }
-        },
-        None,
-    )
-    .await;
-    if let Err(response) = committed {
-        return response;
-    }
-    tracing::info!(target: "session.sync", session = %id, field = "favorite", value = favorited, "session updated");
-    drop(guard);
-    drop(namespace);
-    crate::server::runtime::session_mutation_response(&state, &id, None::<()>).await
-}
-
 /// 409 for ignore refusing a sunk row. The codes stay the ones clients already
 /// switch on; the message names ignore instead of a start.
 fn ignore_blocked_response(blocked: crate::session::StartBlocked) -> axum::response::Response {

@@ -961,9 +961,7 @@ fn terminal_rows_take_status_and_observations_from_the_daemon_only() {
 
 #[test]
 #[serial]
-fn canonical_favorite_reorder_keeps_cursor_on_selected_session() {
-    let original = crate::session::favorites_first();
-    crate::session::set_favorites_first(true);
+fn canonical_pin_reorder_keeps_cursor_on_selected_session() {
     let mut env = create_test_env_with_sessions(2);
     env.view.sort_order = crate::session::config::SortOrder::Name;
     for instance in env.view.instances.values_mut() {
@@ -993,8 +991,7 @@ fn canonical_favorite_reorder_keeps_cursor_on_selected_session() {
             let mut row = daemon_row(env.view.get_instance(id).unwrap(), "Stopped");
             row.view = crate::session::View::Terminal;
             if id == &selected {
-                row.favorited = true;
-                row.favorited_at = Some("2026-09-13T00:00:00Z".into());
+                row.pinned_at = Some("2026-09-13T00:00:00Z".into());
             }
             row
         })
@@ -1019,7 +1016,7 @@ fn canonical_favorite_reorder_keeps_cursor_on_selected_session() {
         env.view.selected_session.as_deref(),
         Some(selected.as_str())
     );
-    crate::session::set_favorites_first(original);
+    assert!(env.view.get_instance(&selected).unwrap().is_pinned());
 }
 
 /// A published result is applied exactly once: a tick with no new publication

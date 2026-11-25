@@ -395,17 +395,15 @@ fn trash_system_health_releases_reader_keyboard() {
     assert_eq!(env.view.selected_session.as_deref(), Some(id.as_str()));
 }
 
-/// The footer advertises Fav only while `favorites_first` makes `f` pin rows
-/// (`Context::FavoritesUsable`); Archive and Snooze have no footer hint.
+/// The footer advertises Pin for a selected session; Archive and Snooze have no footer hint.
 #[test]
 #[serial]
-fn footer_fav_hint_follows_favorites_first() {
+fn footer_advertises_pin_but_not_archive_or_snooze() {
     use crate::tui::styles::load_theme;
     use ratatui::backend::TestBackend;
     use ratatui::Terminal;
 
     let mut env = create_test_env_with_sessions(1);
-    let original = crate::session::favorites_first();
     let theme = load_theme("empire");
 
     let render_footer = |env: &mut TestEnv| -> String {
@@ -428,25 +426,20 @@ fn footer_fav_hint_follows_favorites_first() {
         out
     };
 
-    for favorites_first in [false, true] {
-        crate::session::set_favorites_first(favorites_first);
-        let footer = render_footer(&mut env);
-        assert_eq!(footer.contains("Fav"), favorites_first, "{footer}");
-        for hint in ["Snooze", "Archive"] {
-            assert!(!footer.contains(hint), "{hint}\n{footer}");
-        }
+    let footer = render_footer(&mut env);
+    assert!(footer.contains("Pin"), "{footer}");
+    for hint in ["Snooze", "Archive"] {
+        assert!(!footer.contains(hint), "{hint}\n{footer}");
     }
-
-    crate::session::set_favorites_first(original);
 }
 
 #[test]
 #[serial]
-fn favorite_without_runtime_cannot_change_local_state() {
+fn pin_without_runtime_cannot_change_local_state() {
     let mut env = create_test_env_with_sessions(1);
     env.view.selected_session = Some(env.view.instance_at(0).id.clone());
-    assert!(env.view.toggle_favorite_at_cursor().is_err());
-    assert!(!env.view.instance_at(0).is_favorited());
+    assert!(env.view.toggle_pin_at_cursor().is_err());
+    assert!(!env.view.instance_at(0).is_pinned());
 }
 
 /// Trashing a session hides it from the active list and surfaces it under

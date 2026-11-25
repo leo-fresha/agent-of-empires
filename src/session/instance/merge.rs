@@ -199,7 +199,7 @@ impl Instance {
     /// server's `send_message` respawn briefly writes `status` via
     /// `apply_post_restart_sync`; the resulting transient mis-paint
     /// converges on the next `status_poll` tick.
-    /// User-action fields (archived/favorited/snoozed/title/group_path/...)
+    /// User-action fields (archived/pinned/snoozed/title/group_path/...)
     /// are NOT here; they go through `apply_user_action` per-action so peer
     /// writers (CLI) cannot be clobbered by a stale TUI snapshot.
     pub fn merge_from_tui(&mut self, src: &Self) {
@@ -425,7 +425,7 @@ impl Instance {
     /// this directly; cross-profile moves use `merge_profile_move_user_action_diff`
     /// and assign `source_profile` separately in the storage transaction.
     /// Post-splice rules enforce the same cross-field invariants the
-    /// per-mutation methods enforce (archive XOR favorite, touch unarchives)
+    /// per-mutation methods enforce (archive XOR pin, touch unarchives)
     /// so concurrent peer writes cannot violate them.
     pub fn merge_user_action_diff(&mut self, pre: &Self, post: &Self) {
         debug_assert_eq!(
@@ -449,9 +449,6 @@ impl Instance {
         }
         if pre.ignored_at != post.ignored_at {
             self.ignored_at = post.ignored_at;
-        }
-        if pre.favorited_at != post.favorited_at {
-            self.favorited_at = post.favorited_at;
         }
         if pre.snoozed_until != post.snoozed_until {
             self.snoozed_until = post.snoozed_until;
@@ -498,25 +495,17 @@ impl Instance {
 
         let archived_changed = pre.archived_at != post.archived_at;
         let ignored_changed = pre.ignored_at != post.ignored_at;
-        let favorited_changed = pre.favorited_at != post.favorited_at;
         let snoozed_changed = pre.snoozed_until != post.snoozed_until;
         let pinned_changed = pre.pinned_at != post.pinned_at;
         // Touch is an event invariant: any advance of last_accessed_at
         // (TUI-side or peer-side) dethrones a concurrent archive.
         let touched = self.last_accessed_at > pre.last_accessed_at;
 
-        // archive(): archived=Some => favorited=None, snoozed=None, pinned=None
+        // archive(): archived=Some => ignored=None, snoozed=None, pinned=None
         if archived_changed && post.archived_at.is_some() {
             self.ignored_at = None;
-            self.favorited_at = None;
             self.snoozed_until = None;
             self.pinned_at = None;
-        }
-        // favorite(): favorited=Some => archived=None, ignored=None, snoozed=None
-        if favorited_changed && post.favorited_at.is_some() {
-            self.archived_at = None;
-            self.ignored_at = None;
-            self.snoozed_until = None;
         }
         // snooze(): snoozed=Some => ignored=None, pinned=None.
         if snoozed_changed && post.snoozed_until.is_some() {
@@ -533,7 +522,7 @@ impl Instance {
             self.ignored_at = None;
             self.snoozed_until = None;
         }
-        // Viewing clears sink states, not explicit favorite/pin signals.
+        // Viewing clears sink states, not an explicit pin.
         if touched {
             self.archived_at = None;
             self.ignored_at = None;
@@ -1185,25 +1174,10 @@ mod tests {
         type Check = fn(&Instance) -> bool;
         let archived: Check = |i| i.archived_at.is_some();
         let ignored: Check = |i| i.ignored_at.is_some();
-        let favorited: Check = |i| i.favorited_at.is_some();
         let pinned: Check = |i| i.pinned_at.is_some();
         let snoozed: Check = |i| i.snoozed_until.is_some();
         // (label, pre setup, tui action, peer action, [(check, expected)])
         let cases: &[(&str, Action, Action, Action, &[(Check, bool)])] = &[
-            (
-                "tui favorite beats peer archive",
-                |_| {},
-                |i| i.favorite(),
-                |i| i.archive(),
-                &[(favorited, true), (archived, false)],
-            ),
-            (
-                "tui archive beats peer favorite",
-                |_| {},
-                |i| i.archive(),
-                |i| i.favorite(),
-                &[(archived, true), (favorited, false)],
-            ),
             (
                 "tui touch beats peer archive",
                 |_| {},
@@ -1228,11 +1202,11 @@ mod tests {
                 &[(archived, true), (snoozed, false)],
             ),
             (
-                "tui unfavorite keeps peer archive",
-                |i| i.favorite(),
-                |i| i.unfavorite(),
+                "tui unpin keeps peer archive",
+                |i| i.pin(),
+                |i| i.unpin(),
                 |i| i.archive(),
-                &[(favorited, false), (archived, true)],
+                &[(pinned, false), (archived, true)],
             ),
             (
                 "tui pin beats peer archive",
@@ -1329,7 +1303,7 @@ mod tests {
             ),
             (
                 "idle_dormant_since",
-                |i| i.favorite(),
+                |i| i.pin(),
                 |i| i.idle_dormant_since.is_some(),
             ),
         ];

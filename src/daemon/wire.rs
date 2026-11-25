@@ -839,11 +839,6 @@ pub struct UpdatePinBody {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct UpdateFavoriteBody {
-    pub favorited: bool,
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct UpdateSnoozeBody {
     /// Positive minutes within the shared snooze bounds, or null to unsnooze.
     #[serde(default)]
@@ -1244,14 +1239,6 @@ pub struct SessionResponse {
     /// Created with its `on_create` hooks skipped, so their setup never ran.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub created_without_setup: bool,
-    /// True when the session is marked as a user favorite. Mirrors
-    /// `Instance::is_favorited()`; surfaced so the web sidebar can pin
-    /// favorited rows and render the `*` marker without re-implementing
-    /// the predicate. Cross-feature parity with the TUI's `f`/`F` keybind.
-    #[serde(default)]
-    pub favorited: bool,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub favorited_at: Option<String>,
     /// True when the agent has flagged this session as urgent via the
     /// `attention-urgent` hook (read from `/tmp/aoe-hooks-<euid>/{id}/attention.json`
     /// by `Instance::is_urgent()`). The web sidebar's Attention sort floats
@@ -1261,11 +1248,9 @@ pub struct SessionResponse {
     /// claws back to the top. See #1640.
     #[serde(default)]
     pub urgent: bool,
-    /// RFC3339 timestamp at which the session was web-pinned, or omitted
-    /// when not pinned. Distinct from `favorited`: favorite is the TUI
-    /// within-tier attention-sort signal, while pin is the hard
-    /// top-of-sort surfacing primitive used by the web sidebar. The
-    /// client derives a "pinned" boolean as `pinned_at != null`; no
+    /// RFC3339 timestamp at which the session was pinned, or omitted when
+    /// not pinned. Every Client lifts a pinned row to the top of its header.
+    /// The client derives a "pinned" boolean as `pinned_at != null`; no
     /// separate boolean field is exposed (the timestamp itself is the
     /// source of truth, matching `archived_at` and `snoozed_until`). See
     /// #1581.

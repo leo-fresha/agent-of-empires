@@ -165,7 +165,6 @@ test.describe("Mobile responsive", () => {
         last_accessed_at,
         main_repo_path: `/repo/${id}`,
         scratch: false,
-        favorited: false,
         has_managed_worktree: false,
         cleanup_defaults: {},
         remote_owner: null,

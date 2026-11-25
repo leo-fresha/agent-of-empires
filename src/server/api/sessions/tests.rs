@@ -4035,7 +4035,7 @@ async fn rename_session_rejects_duplicates_and_preserves_newer_cache() {
                 rows.iter_mut()
                     .find(|row| row.id == target_id)
                     .unwrap()
-                    .favorite();
+                    .pin();
                 Ok(())
             })
             .unwrap();
@@ -4046,7 +4046,7 @@ async fn rename_session_rejects_duplicates_and_preserves_newer_cache() {
             .iter_mut()
             .find(|instance| instance.id == target_id)
             .unwrap()
-            .favorite();
+            .pin();
         crate::server::test_support::refresh_canonical_metadata_for_test(&state).await;
         let response = rename_session(
             State(state.clone()),
@@ -4071,7 +4071,7 @@ async fn rename_session_rejects_duplicates_and_preserves_newer_cache() {
         assert_eq!(target.project_path, "/tmp/repo");
         assert_eq!(target.source_profile, "default");
         assert!(
-            target.is_favorited(),
+            target.is_pinned(),
             "newer cached user action must survive rename publication"
         );
     }
@@ -9529,7 +9529,7 @@ async fn composed_group_only_rename_preserves_authoritative_title_and_peer_field
     let id = stale.id.clone();
     let mut durable = stale.clone();
     durable.title = "durable title".into();
-    durable.favorite();
+    durable.pin();
     let (storage, state) = build_rename_test_state(vec![durable], vec![stale]);
     crate::server::test_support::refresh_canonical_metadata_for_test(&state).await;
     let response = rename_session(
@@ -9552,7 +9552,7 @@ async fn composed_group_only_rename_preserves_authoritative_title_and_peer_field
         .unwrap();
     assert_eq!(row.title, "durable title");
     assert_eq!(row.group_path, "assigned");
-    assert!(row.is_favorited());
+    assert!(row.is_pinned());
     let snapshot = state.runtime.snapshot(&state).await?;
     let published = snapshot
         .value
@@ -13517,9 +13517,9 @@ async fn committed_setting_reports_unconfirmed_until_canonical_recovery() -> any
     let response = super::update::commit_profile_update(
         &state,
         "default".into(),
-        "favorite adoption",
+        "pin adoption",
         move |rows| {
-            rows[0].favorited_at = Some(crate::time::Timestamp::now());
+            rows[0].pinned_at = Some(crate::time::Timestamp::now());
             failing_state
                 .canonical_metadata
                 .blocking_write()
@@ -13536,8 +13536,8 @@ async fn committed_setting_reports_unconfirmed_until_canonical_recovery() -> any
     let bytes = axum::body::to_bytes(response.into_body(), 8192).await?;
     let body: serde_json::Value = serde_json::from_slice(&bytes)?;
     assert_eq!(body["error"], "outcome_unconfirmed");
-    assert!(storage.load()?[0].favorited_at.is_some());
-    assert!(state.instances.read().await[0].favorited_at.is_none());
+    assert!(storage.load()?[0].pinned_at.is_some());
+    assert!(state.instances.read().await[0].pinned_at.is_none());
     assert!(matches!(
         *state.canonical_health.read().await,
         crate::daemon::RuntimeHealth::Degraded { .. }
@@ -13559,7 +13559,7 @@ async fn committed_setting_reports_unconfirmed_until_canonical_recovery() -> any
         crate::daemon::RuntimeHealth::Healthy
     );
     let snapshot = state.runtime.snapshot(&state).await?;
-    assert!(snapshot.value.contents.sessions[0].favorited);
+    assert!(snapshot.value.contents.sessions[0].pinned_at.is_some());
     Ok(())
 }
 

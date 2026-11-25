@@ -75,6 +75,7 @@ mod v063_retire_color_labels;
 mod v064_builtin_sounds;
 mod v065_shared_sidebar_view;
 mod v066_shared_custom_order;
+mod v067_favorite_to_pin;
 
 /// Fixtures shared by migrations that rewrite agent hook files.
 #[cfg(test)]
@@ -115,7 +116,7 @@ use anyhow::{Context, Result};
 use std::fs;
 use tracing::{debug, info};
 
-const CURRENT_VERSION: u32 = 66;
+const CURRENT_VERSION: u32 = 67;
 const VERSION_FILE: &str = ".schema_version";
 
 /// Version, log name, and the one-time transformation to run.
@@ -336,6 +337,7 @@ const MIGRATIONS: &[Migration] = &[
     (64, "builtin_sounds", v064_builtin_sounds::run),
     (65, "shared_sidebar_view", v065_shared_sidebar_view::run),
     (66, "shared_custom_order", v066_shared_custom_order::run),
+    (67, "favorite_to_pin", v067_favorite_to_pin::run),
 ];
 
 /// The data-schema version this build targets, i.e. the version every install

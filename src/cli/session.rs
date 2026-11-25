@@ -80,14 +80,13 @@ pub enum SessionCommands {
     /// Wake a snoozed session immediately
     Unsnooze(SessionIdArgs),
 
-    /// Mark a session as a favorite. With `session.favorites_first` on (the
-    /// default), favorited rows pin to the top of their sibling scope under the
-    /// Name and Newest first sorts and show a `✦` in the session list gutter;
-    /// Custom keeps the order you arranged. A snoozed favorite keeps its place.
-    Favorite(SessionIdArgs),
+    /// Pin a session to the top of its header in the session list and the web
+    /// dashboard, under every sort. Pinning cancels archive, ignore and snooze;
+    /// archiving, ignoring or snoozing it clears the pin.
+    Pin(SessionIdArgs),
 
-    /// Clear the favorite flag on a session.
-    Unfavorite(SessionIdArgs),
+    /// Unpin a session
+    Unpin(SessionIdArgs),
 
     /// Archive a session: move it to the Archived section and tear down its
     /// tmux sessions. Worktree, branch, container preserved. `--no-kill`
@@ -406,11 +405,9 @@ pub async fn run(profile: &str, command: SessionCommands) -> Result<()> {
         SessionCommands::SetBase(args) => set_base(profile, args).await,
         SessionCommands::Snooze(args) => snooze_session(profile, args).await,
         SessionCommands::Unsnooze(args) => unsnooze_session(profile, args).await,
-        SessionCommands::Favorite(args) => {
-            mark_session(profile, args, "Favorited", Instance::favorite).await
-        }
-        SessionCommands::Unfavorite(args) => {
-            mark_session(profile, args, "Unfavorited", Instance::unfavorite).await
+        SessionCommands::Pin(args) => mark_session(profile, args, "Pinned", Instance::pin).await,
+        SessionCommands::Unpin(args) => {
+            mark_session(profile, args, "Unpinned", Instance::unpin).await
         }
         SessionCommands::Archive(args) => archive_session(profile, args).await,
         SessionCommands::Unarchive(args) => {
