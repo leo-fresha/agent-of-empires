@@ -224,7 +224,8 @@ export function SidebarViewMenu({
                 SORT_LABEL[value],
                 () => onSortChange(value),
                 {
-                  disabled: readOnly,
+                  // Picking the shared sort back only drops this browser's plugin sort, which writes nothing.
+                  disabled: readOnly && !(activePlugin && value === sort),
                   hint: value === "custom" ? "drag to reorder" : undefined,
                 },
               ),

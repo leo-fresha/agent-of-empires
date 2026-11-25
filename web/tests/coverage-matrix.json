@@ -2823,7 +2823,7 @@
         "web/src/lib/sidebarView.ts",
         "web/src/lib/sidebarReorder.ts"
       ],
-      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom, and Reset clears the shared Custom order."
+      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom once that order saves, a write that never answers stops holding polls off, and Reset clears the shared Custom order."
     },
     {
       "id": "sidebar.plugin-sort-filter",

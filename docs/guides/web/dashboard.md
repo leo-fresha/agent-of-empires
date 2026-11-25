@@ -87,18 +87,18 @@ The sidebar header's view button reads the grouping and the sort, for example **
 - **Repository** (default): a header per git repository, with your Groups nested inside it. Sessions in no Group sit directly under the repository header. A session split across Groups appears once per Group.
 - **My groups**: a header per user-defined Group, assigned in the TUI rename dialog, with `aoe group move`, or via **Move to another group** below. Ungrouped sessions fall into an **Ungrouped** bucket at the bottom.
 
-Collapse state is tracked per grouping, in this browser.
+Collapse state is tracked per grouping and is not shared with the TUI.
 
 **Sort**:
 
-- **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Rows and headers you never moved sit on top, newest first. The order is the one the TUI uses, stored in `workspace-ordering.json`.
+- **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Rows and repository headers you never moved sit on top, newest first; Group headers stay in name order. The order is the one the TUI uses, stored in `workspace-ordering.json`.
 - **Name**: rows A to Z by title, headers by name, ignoring case. Dragging a row or header switches to Custom, starting from the order on screen, so only what you dragged moves.
 - **Reset to newest first** clears the Custom order for every Client.
 - Plugin sorts, when a plugin offers one, are listed below and apply only in this browser until you reload or pick another sort. Dragging is off while one applies.
 
 Pinned rows stay at the top of their header under every sort. The Multi-repo and Scratch headers stay at the bottom. Header drag is off while a filter is active, and every drag is off while a plugin facet filters the rows.
 
-The filter button opens a text filter and a **Needs you** toggle, which shows only the sessions waiting on you, in error, flagged urgent, or flagged by a plugin, under their headers, and hides the "Snoozed & archived" footer. Closing the filter clears both.
+The filter button opens a text filter and a **Needs you** toggle, which shows only the rows with a session waiting on you, in error, flagged urgent, or flagged by a plugin, under their headers, and hides the "Snoozed & archived" footer. Closing the filter clears both.
 
 **Move to another group.** Right-click (long-press on touch) a session row and choose **More > Move to another group**. The dialog lists the profile's existing groups with the current one highlighted: pick one, or type a new path to create that group. **Remove from group** (or clearing the field) drops the session back to **Ungrouped**. With the list open, Enter picks the highlighted group and a second Enter saves; Escape closes the list, then the dialog. Group paths use `/` for hierarchy (e.g. `work/projects`). Hidden in read-only mode.
 

@@ -43,6 +43,28 @@ describe("SidebarViewMenu", () => {
     expect(menu()).toBeNull();
   });
 
+  it("lets a read-only viewer drop a plugin sort without changing the shared sort", () => {
+    const onSortChange = vi.fn();
+    render(
+      <SidebarViewMenu
+        compact={false}
+        groupBy="project"
+        sort="custom"
+        onGroupByChange={vi.fn()}
+        onSortChange={onSortChange}
+        onResetCustomOrder={vi.fn()}
+        pluginSorts={[{ pluginId: "p", entryId: "e", label: "Cost", column: "cost", direction: "asc" }]}
+        pluginSortRef={{ pluginId: "p", entryId: "e" }}
+        onPluginSortChange={vi.fn()}
+        readOnly
+      />,
+    );
+    fireEvent.click(trigger());
+    expect((screen.getByTestId("sidebar-view-sort-name") as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByTestId("sidebar-view-sort-custom"));
+    expect(onSortChange).toHaveBeenCalledWith("custom");
+  });
+
   // #5345: the window listener that clears the sidebar selection on Escape ran after the view menu's dismissal.
   it("Escape that closes a popup keeps the sidebar selection; the next Escape clears it", () => {
     let closedMenu = () => false;
