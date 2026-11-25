@@ -20,7 +20,8 @@ export function SidebarToolbar({
   pluginSorts,
   pluginSortRef,
   onPluginSortChange,
-  readOnly,
+  viewLocked,
+  rightSide,
   hasFacets,
   facetsActive,
   facetOpen,
@@ -41,7 +42,8 @@ export function SidebarToolbar({
   pluginSorts: PluginSortSpec[];
   pluginSortRef: PluginSortRef | null;
   onPluginSortChange: (ref: PluginSortRef) => void;
-  readOnly?: boolean;
+  viewLocked?: boolean;
+  rightSide?: boolean;
   hasFacets: boolean;
   facetsActive: boolean;
   facetOpen: boolean;
@@ -65,7 +67,8 @@ export function SidebarToolbar({
       pluginSorts={pluginSorts}
       pluginSortRef={pluginSortRef}
       onPluginSortChange={onPluginSortChange}
-      readOnly={readOnly}
+      locked={viewLocked}
+      opensLeft={compact && rightSide}
     />
   );
   return (

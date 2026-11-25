@@ -102,6 +102,9 @@ interface Props {
   onRestartForUpdate?: (sessionId: string) => void;
   onSwitchView?: (sessionId: string, toStructured: boolean) => void;
   readOnly?: boolean;
+  /** False in CityHall client mode, where the Daemon refuses grouping, sort and Custom order writes. Group moves
+   *  stay allowed. */
+  canArrangeView?: boolean;
   /** False in CityHall client mode, which hides project management. */
   canManageProjects?: boolean;
   pluginSortRef: { pluginId: string; entryId: string } | null;
@@ -269,10 +272,13 @@ export function WorkspaceSidebar(props: Props) {
 
   // Rows reorder within their header and headers among themselves, but not while a plugin sort or facet decides
   // which rows show. A header drag also waits for any filter, which hides headers.
-  const rowsDisabled = !!readOnly || pluginSortActive || facets.activeFacets.length > 0;
+  const viewLocked = !!readOnly || props.canArrangeView === false;
+  const pluginDecides = pluginSortActive || facets.activeFacets.length > 0;
+  const rowsDisabled = viewLocked || pluginDecides;
   const drag: DragOptions = {
     rowsDisabled,
-    headersDisabled: rowsDisabled || hasFilter,
+    repoHeadersDisabled: rowsDisabled || hasFilter,
+    groupHeadersDisabled: !!readOnly || pluginDecides || hasFilter,
     onMoveWorkspace: props.onMoveWorkspace,
     onMoveRepository: props.onMoveRepository,
     onMoveGroup: props.onMoveGroup,
@@ -318,7 +324,8 @@ export function WorkspaceSidebar(props: Props) {
           onGroupByChange={props.onGroupByChange}
           onSortChange={props.onSortChange}
           onResetCustomOrder={props.onResetCustomOrder}
-          readOnly={readOnly}
+          viewLocked={viewLocked}
+          rightSide={rightSide}
           pluginSorts={pluginSorts}
           pluginSortRef={props.pluginSortRef}
           onPluginSortChange={props.onPluginSortChange}

@@ -43,7 +43,7 @@ describe("SidebarViewMenu", () => {
     expect(menu()).toBeNull();
   });
 
-  it("lets a read-only viewer drop a plugin sort without changing the shared sort", () => {
+  it("lets a viewer who cannot change the view drop a plugin sort without changing the shared sort", () => {
     const onSortChange = vi.fn();
     render(
       <SidebarViewMenu
@@ -56,7 +56,7 @@ describe("SidebarViewMenu", () => {
         pluginSorts={[{ pluginId: "p", entryId: "e", label: "Cost", column: "cost", direction: "asc" }]}
         pluginSortRef={{ pluginId: "p", entryId: "e" }}
         onPluginSortChange={vi.fn()}
-        readOnly
+        locked
       />,
     );
     fireEvent.click(trigger());

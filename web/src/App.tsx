@@ -475,6 +475,7 @@ function AppContent({
     changeOrdering,
     orderingSaving,
     changeSidebarView,
+    onSharedRead,
     error,
     loaded: sessionsLoaded,
     trashedCount,
@@ -593,6 +594,7 @@ function AppContent({
     changeOrdering,
     orderingSaving,
     changeSidebarView,
+    onSharedRead,
   });
 
   // Selected diff-file identity. `repoName` is undefined for single-repo
@@ -2827,6 +2829,7 @@ function AppContent({
                 onRestartForUpdate={restartForUpdate}
                 onSwitchView={handleSwitchView}
                 readOnly={caps.readOnly}
+                canArrangeView={!caps.cityhall}
                 canManageProjects={caps.canManageProjects}
                 pluginSortRef={sidebar.pluginSortRef}
                 onPluginSortChange={sidebar.selectPluginSort}

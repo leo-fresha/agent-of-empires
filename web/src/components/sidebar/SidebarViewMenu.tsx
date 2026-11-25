@@ -38,7 +38,8 @@ export function SidebarViewMenu({
   pluginSorts,
   pluginSortRef,
   onPluginSortChange,
-  readOnly,
+  locked,
+  opensLeft = false,
 }: {
   compact: boolean;
   groupBy: SidebarGroupBy;
@@ -49,8 +50,10 @@ export function SidebarViewMenu({
   pluginSorts: PluginSortSpec[];
   pluginSortRef: PluginSortRef | null;
   onPluginSortChange: (ref: PluginSortRef) => void;
-  /** The shared view is the Daemon's, which a read-only viewer cannot change. */
-  readOnly?: boolean;
+  /** The shared view is the Daemon's, which a read-only viewer or a CityHall client cannot change. */
+  locked?: boolean;
+  /** The rail on the right edge opens the menu toward the content. */
+  opensLeft?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -198,7 +201,7 @@ export function SidebarViewMenu({
           aria-label="Sidebar view"
           data-testid="sidebar-view-menu"
           onKeyDown={onMenuKeyDown}
-          className="absolute left-0 top-full mt-1 w-[232px] max-w-[calc(100vw-2rem)] bg-surface-800 border border-surface-700/50 rounded-md shadow-xl py-1 z-50 animate-fade-in"
+          className={`absolute ${opensLeft ? "right-0" : "left-0"} top-full mt-1 w-[232px] max-w-[calc(100vw-2rem)] bg-surface-800 border border-surface-700/50 rounded-md shadow-xl py-1 z-50 animate-fade-in`}
         >
           <SectionLabel>Group by</SectionLabel>
           <div role="group" aria-label="Group by">
@@ -208,9 +211,7 @@ export function SidebarViewMenu({
                 value === groupBy,
                 GROUP_BY_LABEL[value],
                 () => onGroupByChange(value),
-                {
-                  disabled: readOnly,
-                },
+                { disabled: locked },
               ),
             )}
           </div>
@@ -225,7 +226,7 @@ export function SidebarViewMenu({
                 () => onSortChange(value),
                 {
                   // Picking the shared sort back only drops this browser's plugin sort, which writes nothing.
-                  disabled: readOnly && !(activePlugin && value === sort),
+                  disabled: locked && !(activePlugin && value === sort),
                   hint: value === "custom" ? "drag to reorder" : undefined,
                 },
               ),
@@ -236,7 +237,7 @@ export function SidebarViewMenu({
             type="button"
             role="menuitem"
             tabIndex={-1}
-            disabled={readOnly}
+            disabled={locked}
             data-testid="sidebar-view-reset-order"
             onClick={() => {
               close();
