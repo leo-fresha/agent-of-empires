@@ -81,6 +81,9 @@ workflows:
         - 'softprops/action-gh-release@v3.0.3'
     '.github/workflows/rust-toolchain-bump.yml':
         - 'actions/checkout@v7.0.1'
+    '.github/workflows/tessl.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'tesslio/setup-tessl@v2'
     '.github/workflows/tests.yml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
@@ -275,3 +278,8 @@ dependencies:
         commit: 'sha1-86f7a0ffb25f40114606501a311ebcfaf882ea32'
         owner_id: 43724913
         repo_id: 442947557
+    'tesslio/setup-tessl@v2':
+        ref: 'v2'
+        commit: 'sha1-25ec223fc0da33b41b8044ff5ab2b85235f4f91e'
+        owner_id: 160232465
+        repo_id: 1191723107
