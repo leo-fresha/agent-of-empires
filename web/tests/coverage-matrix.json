@@ -2678,7 +2678,7 @@
         "web/src/components/sidebar/dnd.ts",
         "web/src/hooks/app/useSidebarModel.ts"
       ],
-      "notes": "One POST /api/reorder carries the Group's siblings in their new order. A drop only lands among the dragged header's own siblings, Scratch and Multi-repo headers do not drag, and under My groups Ungrouped renders first, as ranges count it."
+      "notes": "One POST /api/reorder carries the Group's siblings in their new order. A drop only lands among the dragged header's own siblings, Scratch and Multi-repo headers do not drag, a CityHall client still moves Group headers, and under My groups Ungrouped renders first, as ranges count it."
     },
     {
       "id": "story.sidebar-reorder-reload-persists",
@@ -2841,7 +2841,7 @@
         "web/src/lib/sidebarView.ts",
         "web/src/lib/sidebarReorder.ts"
       ],
-      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom once that order saves, a write that never answers stops holding polls off, and Reset clears the shared Custom order. Sort and grouping writes, and ordering writes, reach the Daemon one at a time in the order made; a drag while a move is saving is refused with \"The last move is still saving\". A drag-switch to Custom also keeps the Group headers in their Name order, and with Reset offers an Undo toast once saved that writes back only what the change wrote (and Name), held while a write is saving and dropped by the next order or sort change or a read showing another Client's change. A write receipt from a restarted Daemon rejects reads still in flight from the old one."
+      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom once that order saves, a write that never answers stops holding polls off, and Reset clears the shared Custom order. Sort and grouping writes, and ordering writes, reach the Daemon one at a time in the order made; a drag while a move is saving is refused with \"The last move is still saving\". A drag-switch to Custom also keeps the Group headers in their Name order, and with Reset offers an Undo toast once saved that writes back only what the change wrote (and Name), held while a write is saving and dropped by the next order or sort change or a read showing another Client's change. A write receipt from a restarted Daemon rejects reads still in flight from the old one. When the switch to Custom fails after an order landed, the orders are put back with a notice; a switch that would reorder the Groups of several profiles is refused before any write, and Reset is refused while a move is saving."
     },
     {
       "id": "sidebar.plugin-sort-filter",
@@ -2852,7 +2852,8 @@
         "web/src/components/WorkspaceSidebar.tsx",
         "web/src/components/sidebar/SidebarViewMenu.tsx",
         "web/src/components/plugin/PluginSlots.tsx"
-      ]
+      ],
+      "notes": "A facet no row matches shows \"No matching sessions\"."
     },
     {
       "id": "plugins.link-navigation",
