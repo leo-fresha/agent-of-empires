@@ -49,8 +49,8 @@ pub use wire::{
     StopAuxiliaryBody, TerminalSize, TerminalTarget, TerminalTargetStatus, TrashOutcome,
     TrashRelocationOutcome, TrashSessionBody, Tristate, UpdateArchiveBody, UpdateDiffBaseBody,
     UpdateFavoriteBody, UpdateGroupBody, UpdateIgnoredBody, UpdateNotificationsBody, UpdatePinBody,
-    UpdateSnoozeBody, UpdateUnreadBody, WorkspaceOrderingPatch, WorkspaceRepoSummary,
-    WorktreeEditOutcome,
+    UpdateSnoozeBody, UpdateUnreadBody, WorkspaceOrderingBase, WorkspaceOrderingPatch,
+    WorkspaceRepoSummary, WorktreeEditOutcome,
 };
 pub use wire::{
     ApplyUpdateBody, InstallPreviewBody, PluginJob, PluginJobAccepted, PluginJobKind, PluginJobLog,
