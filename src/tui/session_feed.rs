@@ -1260,6 +1260,10 @@ impl SessionFeed {
         Ok(())
     }
 
+    pub(crate) fn ordering_pending(&self) -> bool {
+        self.pending_ordering.is_some()
+    }
+
     pub(crate) fn sidebar_view_pending(&self) -> bool {
         self.pending_sidebar_view.is_some()
     }
