@@ -81,8 +81,9 @@ pub enum SessionCommands {
     Unsnooze(SessionIdArgs),
 
     /// Pin a session to the top of its header in the session list and the web
-    /// dashboard, under every sort. Pinning cancels archive, ignore and snooze;
-    /// archiving, ignoring or snoozing it clears the pin.
+    /// dashboard, under every sort, with the sessions sharing its worktree. Pinning
+    /// cancels archive, ignore and snooze; archiving, ignoring or snoozing it clears
+    /// the pin.
     Pin(SessionIdArgs),
 
     /// Unpin a session
@@ -405,10 +406,8 @@ pub async fn run(profile: &str, command: SessionCommands) -> Result<()> {
         SessionCommands::SetBase(args) => set_base(profile, args).await,
         SessionCommands::Snooze(args) => snooze_session(profile, args).await,
         SessionCommands::Unsnooze(args) => unsnooze_session(profile, args).await,
-        SessionCommands::Pin(args) => mark_session(profile, args, "Pinned", Instance::pin).await,
-        SessionCommands::Unpin(args) => {
-            mark_session(profile, args, "Unpinned", Instance::unpin).await
-        }
+        SessionCommands::Pin(args) => pin_session(profile, args, true).await,
+        SessionCommands::Unpin(args) => pin_session(profile, args, false).await,
         SessionCommands::Archive(args) => archive_session(profile, args).await,
         SessionCommands::Unarchive(args) => {
             mark_session(profile, args, "Unarchived", Instance::unarchive).await
@@ -437,6 +436,30 @@ async fn mark_session(
         })
     })?;
     println!("{verb}: {title}");
+    Ok(())
+}
+
+async fn pin_session(profile: &str, args: SessionIdArgs, pinned: bool) -> Result<()> {
+    use crate::daemon::{SessionMutation, UpdatePinBody};
+
+    let (client, epoch) = super::group::daemon_client().await?;
+    let profile = if profile.is_empty() {
+        client.default_profile().await?
+    } else {
+        profile.to_string()
+    };
+    let rows =
+        super::session_move::in_profile(client.list_sessions(None).await?.sessions, &profile);
+    let row = super::session_move::resolve(&args.identifier, &rows)?;
+    client
+        .mutate_session(
+            &row.id,
+            &SessionMutation::Pin(UpdatePinBody { pinned }),
+            &epoch,
+        )
+        .await?;
+    let verb = if pinned { "Pinned" } else { "Unpinned" };
+    println!("{verb}: {}", row.title);
     Ok(())
 }
 

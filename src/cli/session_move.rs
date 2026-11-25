@@ -77,7 +77,7 @@ pub async fn run(profile: &str, args: MoveArgs) -> Result<()> {
     Ok(())
 }
 
-fn in_profile(rows: Vec<SessionResponse>, source: &str) -> Vec<SessionResponse> {
+pub(super) fn in_profile(rows: Vec<SessionResponse>, source: &str) -> Vec<SessionResponse> {
     rows.into_iter().filter(|r| r.profile == source).collect()
 }
 
@@ -105,7 +105,10 @@ fn partial_report(error: &str, target: &str, ids: &[&str], moved: &[&str], faile
 }
 
 /// Id, then unique id prefix, then unique title.
-fn resolve<'a>(identifier: &str, rows: &'a [SessionResponse]) -> Result<&'a SessionResponse> {
+pub(super) fn resolve<'a>(
+    identifier: &str,
+    rows: &'a [SessionResponse],
+) -> Result<&'a SessionResponse> {
     if let Some(row) = rows.iter().find(|r| r.id == identifier) {
         return Ok(row);
     }
