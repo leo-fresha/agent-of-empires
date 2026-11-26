@@ -96,7 +96,7 @@ impl HomeView {
         let after = self.flat_items[at..].iter().take_while(in_run);
         crate::session::pinned_workspaces(before.chain(after).filter_map(|item| match item {
             Item::Session { id, .. } => self.get_instance(id),
-            Item::Group { .. } => None,
+            Item::Group { .. } | Item::Suggested { .. } => None,
         }))
     }
 
