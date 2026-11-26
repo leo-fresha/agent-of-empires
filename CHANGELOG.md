@@ -4,6 +4,28 @@ All notable changes to Agent of Empires will be documented in this file.
 
 The format follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [1.27.0](https://github.com/agent-of-empires/agent-of-empires/releases/tag/v1.27.0) - 2026-11-26
+
+
+### Bug Fixes
+
+- **sound:** Play built-in sounds from the daemon and the dashboard in [#6069](https://github.com/agent-of-empires/agent-of-empires/pull/6069) by [@njbrake](https://github.com/njbrake) ([`ac75b2f`](https://github.com/agent-of-empires/agent-of-empires/commit/ac75b2f9339fe7afef059a4d7ca59e3506c65751))
+- **web:** Keep a resumed background sub-agent running in the pane and card in [#6031](https://github.com/agent-of-empires/agent-of-empires/pull/6031) by [@Seluj78](https://github.com/Seluj78) ([`c5c9d6e`](https://github.com/agent-of-empires/agent-of-empires/commit/c5c9d6ea449dd7ab662905d06a589fc3a83b479e))
+
+
+### Features
+
+- **website:** Add llms.txt, llms-full.txt and raw markdown docs in [#6043](https://github.com/agent-of-empires/agent-of-empires/pull/6043) by [@Seluj78](https://github.com/Seluj78) ([`d9bb5f3`](https://github.com/agent-of-empires/agent-of-empires/commit/d9bb5f38e9f72c628d5ad5eb9b7ee1429112ba67))
+- **acp:** Show Codex native subagents in the Sub agents pane in [#6057](https://github.com/agent-of-empires/agent-of-empires/pull/6057) by [@njbrake](https://github.com/njbrake) ([`c5b67f9`](https://github.com/agent-of-empires/agent-of-empires/commit/c5b67f96846d8b1867dc115b18b20809bec10b7d))
+- **web:** Widen the structured view column on wide screens in [#6052](https://github.com/agent-of-empires/agent-of-empires/pull/6052) by [@tessl-app[bot]](https://github.com/tessl-app[bot]) ([`af9aa4b`](https://github.com/agent-of-empires/agent-of-empires/commit/af9aa4b2de2a5963219d98e2a1ad327003b381c9))
+- **tui:** Fold snoozed sessions into the hide-stopped filter in [#6066](https://github.com/agent-of-empires/agent-of-empires/pull/6066) by [@athal7](https://github.com/athal7) ([`075578a`](https://github.com/agent-of-empires/agent-of-empires/commit/075578a5d477d3c21c713a0bd527466571de0c92))
+- **suggestions:** Core store, host handlers and HTTP API in [#5595](https://github.com/agent-of-empires/agent-of-empires/pull/5595) by [@Seluj78](https://github.com/Seluj78) ([`4b19aa0`](https://github.com/agent-of-empires/agent-of-empires/commit/4b19aa05b39328782f42ff4c09cf42df7869bbb4))
+- **web:** Suggested sessions dashboard, settings and guide in [#5599](https://github.com/agent-of-empires/agent-of-empires/pull/5599) by [@Seluj78](https://github.com/Seluj78) ([`83161f1`](https://github.com/agent-of-empires/agent-of-empires/commit/83161f1c5ef7c095681f3498338a3fbb25c0dc03))
+- **tui:** Suggested sessions view, Suggested group and one-line prompt in [#5600](https://github.com/agent-of-empires/agent-of-empires/pull/5600) by [@Seluj78](https://github.com/Seluj78) ([`956d130`](https://github.com/agent-of-empires/agent-of-empires/commit/956d1300783ca24ee07453abb95e842dac386c91))
+
+
+**Full Changelog**: https://github.com/agent-of-empires/agent-of-empires/compare/v1.26.0...v1.27.0
+
 ## [1.26.0](https://github.com/agent-of-empires/agent-of-empires/releases/tag/v1.26.0) - 2026-11-25
 
 
