@@ -131,7 +131,7 @@ base("sidebar view menu", async ({ page }, testInfo) => {
     await page.goto(`${serve.baseUrl}/`);
     await page.getByRole("link").filter({ hasText: "api-server" }).first().waitFor({ timeout: 15_000 });
 
-    // The one view menu: the shared grouping and sort, the Custom reset, and plugin sorts.
+    // The one view menu: the shared grouping and sort, and plugin sorts.
     await page.getByTestId("sidebar-view-toggle").click();
     await page.getByTestId("sidebar-view-menu").waitFor({ timeout: 10_000 });
     await shot(page, "web/sidebar-grouping.png");

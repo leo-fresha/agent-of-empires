@@ -52,7 +52,7 @@ test("arrow keys skip deleting session rows", async ({ page }) => {
   await expect(page).toHaveURL("/");
 });
 
-// Two repos of two rows each: under My groups also two Groups, so either grouping shows two headers. Under
+// Two repos of two rows each: under Groups also two Groups, so either grouping shows two headers. Under
 // Repository they stay out of Groups, which would nest a header of their own inside each repository.
 const twoByTwo = (grouped: boolean): MockSessionInput[] =>
   [

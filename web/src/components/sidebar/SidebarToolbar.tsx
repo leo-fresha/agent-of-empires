@@ -16,7 +16,6 @@ export function SidebarToolbar({
   sort,
   onGroupByChange,
   onSortChange,
-  onResetCustomOrder,
   pluginSorts,
   pluginSortRef,
   onPluginSortChange,
@@ -38,7 +37,6 @@ export function SidebarToolbar({
   sort: SidebarSort;
   onGroupByChange: (groupBy: SidebarGroupBy) => void;
   onSortChange: (sort: SidebarSort) => void;
-  onResetCustomOrder: () => void;
   pluginSorts: PluginSortSpec[];
   pluginSortRef: PluginSortRef | null;
   onPluginSortChange: (ref: PluginSortRef) => void;
@@ -63,7 +61,6 @@ export function SidebarToolbar({
       sort={sort}
       onGroupByChange={onGroupByChange}
       onSortChange={onSortChange}
-      onResetCustomOrder={onResetCustomOrder}
       pluginSorts={pluginSorts}
       pluginSortRef={pluginSortRef}
       onPluginSortChange={onPluginSortChange}

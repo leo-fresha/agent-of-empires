@@ -1405,7 +1405,7 @@
         "web/src/components/sidebar/SessionRow.tsx",
         "web/src/components/WorkspaceSidebar.tsx"
       ],
-      "notes": "A worktree row that collapsed more than one session into itself can expand into a full, indented row per session behind a guide line, instead of leaving every session but the row's picked one unreachable. Each expanded row has its own click-to-navigate (a modified click never selects the group), single-session context menu, optimistic triage and active-session marking; none of them read or write the group's selection or triage state. Expanded rows hide in the compact rail. Under My groups one workspace is split across groups under a single id, so every slice's children reconcile their optimistic overrides, and a later canonical update is not masked by a stale pin. A session keeps reconciling after its siblings leave, so a worktree going 2 -> 1 -> 2 sessions does not resurrect a stale override."
+      "notes": "A worktree row that collapsed more than one session into itself can expand into a full, indented row per session behind a guide line, instead of leaving every session but the row's picked one unreachable. Each expanded row has its own click-to-navigate (a modified click never selects the group), single-session context menu, optimistic triage and active-session marking; none of them read or write the group's selection or triage state. Expanded rows hide in the compact rail. Under Groups one workspace is split across groups under a single id, so every slice's children reconcile their optimistic overrides, and a later canonical update is not masked by a stale pin. A session keeps reconciling after its siblings leave, so a worktree going 2 -> 1 -> 2 sessions does not resurrect a stale override."
     },
     {
       "id": "app-shell.mobile-chrome-collapse",
@@ -2678,7 +2678,7 @@
         "web/src/components/sidebar/dnd.ts",
         "web/src/hooks/app/useSidebarModel.ts"
       ],
-      "notes": "One POST /api/reorder carries the Group's siblings in their new order. A drop only lands among the dragged header's own siblings, Scratch and Multi-repo headers do not drag, a CityHall client still moves Group headers, and under My groups Ungrouped renders first, as ranges count it."
+      "notes": "One POST /api/reorder carries the Group's siblings in their new order; under Name or Newest first a header drag first commits the headers on screen and switches to Custom. A drop only lands among the dragged header's own siblings, Scratch and Multi-repo headers do not drag, a CityHall client still moves Group headers, and under Groups Ungrouped renders first, as ranges count it."
     },
     {
       "id": "story.sidebar-reorder-reload-persists",
@@ -2816,7 +2816,7 @@
         "web/src/components/Tooltip.tsx",
         "web/src/components/sidebar/SidebarToolbar.tsx"
       ],
-      "notes": "One view button reads \"<Grouping> · <Sort>\" and opens the shared grouping and sort, Reset to newest first, and this browser's plugin sorts; it keeps the filter and new-session buttons on its row (#5896). Read-only viewers and CityHall clients cannot change the shared choices, and CityHall drags only Group headers."
+      "notes": "One view button reads \"<Grouping> · <Sort>\" and opens the shared grouping, the sorts Custom, Newest first and Name, and this browser's plugin sorts; it keeps the filter and new-session buttons on its row (#5896). Read-only viewers and CityHall clients cannot change the shared choices, and CityHall drags only Group headers."
     },
     {
       "id": "sidebar.popup-escape-keeps-selection",
@@ -2841,7 +2841,7 @@
         "web/src/lib/sidebarView.ts",
         "web/src/lib/sidebarReorder.ts"
       ],
-      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name freezes the order on screen and switches to Custom once that order saves, a write that never answers stops holding polls off, and Reset clears the shared Custom order. Sort and grouping writes, and ordering writes, reach the Daemon one at a time in the order made; a drag while a move is saving is refused with \"The last move is still saving\". A drag-switch to Custom also keeps the Group headers in their Name order, and with Reset offers an Undo toast once saved that writes back only what the change wrote (and Name), held while a write is saving and dropped by the next order or sort change or a read showing another Client's change. A write receipt from a restarted Daemon rejects reads still in flight from the old one. When the switch to Custom fails after an order landed, the orders are put back with a notice; a switch that would reorder the Groups of several profiles is refused before any write, and Reset is refused while a move is saving."
+      "notes": "The grouping and sort are the Daemon's (PATCH /api/sidebar-view): a pick shows at once and no poll older than its receipt undoes it, another Client's pick arrives on the next poll, a drag under Name or Newest first freezes the order on screen and switches to Custom once that order saves, and a write that never answers stops holding polls off. Newest first orders rows by their newest session and headers by their newest live one, as the TUI does. Sort and grouping writes, and ordering writes, reach the Daemon one at a time in the order made; a drag while a move is saving is refused with \"The last move is still saving\". A drag-switch to Custom also keeps the Group headers where they are and offers a \"Switched to Custom\" Undo toast once saved that writes back only what the change wrote and the previous sort, held while a write is saving and dropped by the next order or sort change or a read showing another Client's change. A write receipt from a restarted Daemon rejects reads still in flight from the old one. When the switch to Custom fails after an order landed, the orders are put back with a notice; a switch whose Group headers no Group order can keep is refused before any write."
     },
     {
       "id": "sidebar.plugin-sort-filter",
@@ -2937,7 +2937,7 @@
         "web/src/hooks/useSessionGroups.ts",
         "web/src/lib/sidebarGroups.ts"
       ],
-      "notes": "My groups, picked in the view menu; the pick comes back from the Daemon after a reload and collapse stays per grouping."
+      "notes": "Groups, picked in the view menu; the pick comes back from the Daemon after a reload and collapse stays per grouping."
     },
     {
       "id": "sidebar.nested-axis-pure",
@@ -4861,7 +4861,7 @@
       "risk": "low",
       "specs": ["src/components/__tests__/ProjectsSection.test.tsx", "src/lib/__tests__/registeredProjects.test.ts"],
       "components": ["web/src/components/ProjectsSection.tsx", "web/src/lib/registeredProjects.ts"],
-      "notes": "Under Repository the section is \"Projects, no sessions\" and lists unpinned Projects without a live group; My groups draws no repository headers, so it is \"Projects\" and lists every registered Project once, pinned or with live sessions included, a pinned row marked ◆ (#5065). Compact is \"Projects\" under either grouping."
+      "notes": "Under Repository the section is \"Projects, no sessions\" and lists unpinned Projects without a live group; Groups draws no repository headers, so it is \"Projects\" and lists every registered Project once, pinned or with live sessions included, a pinned row marked ◆ (#5065). Compact is \"Projects\" under either grouping."
     },
     {
       "id": "story.settings-paired-terminal-sizing",

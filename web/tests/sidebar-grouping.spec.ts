@@ -1,5 +1,5 @@
 // Sidebar groupings (#1220, #1234, #1720, #5896): Repository, with the user's Groups nested under each repository
-// header, and My groups, picked in the shared view menu, with per-grouping collapse persisted in localStorage.
+// header, and Groups, picked in the shared view menu, with per-grouping collapse persisted in localStorage.
 // Bucketing is unit-tested in src/lib/__tests__/sidebarGroups.test.ts.
 
 import { test, expect } from "./helpers/mockedTest";
@@ -132,8 +132,8 @@ test.describe("sidebar repo groups (#1220)", () => {
   });
 });
 
-test.describe("sidebar My groups (#1234)", () => {
-  test("My groups renders user groups by group_path; the pick and their collapse persist across reload", async ({
+test.describe("sidebar Groups (#1234)", () => {
+  test("Groups renders user groups by group_path; the pick and their collapse persist across reload", async ({
     page,
   }) => {
     const mocks = await installSidebarMocks(page, { sessions: groupedSessions() });
@@ -147,7 +147,7 @@ test.describe("sidebar My groups (#1234)", () => {
     const viewToggle = page.locator(VIEW_TOGGLE);
     await expect(viewToggle).toHaveText(/Repository.*Custom/);
     await pickGrouping(page, viewToggle, "group");
-    await expect(viewToggle).toHaveText(/My groups.*Custom/);
+    await expect(viewToggle).toHaveText(/Groups.*Custom/);
     expect(mocks.viewPatches).toEqual([{ group_by: "group" }]);
 
     await expect(headers).toHaveCount(2);
@@ -271,7 +271,7 @@ test.describe("sidebar Repository grouping (#1720)", () => {
   });
 });
 
-test.describe("sidebar view menu and My groups slices (#5896)", () => {
+test.describe("sidebar view menu and Groups slices (#5896)", () => {
   test("the view menu follows the menu-button pattern: focus on open, arrows, Escape and Tab-out", async ({ page }) => {
     await installSidebarMocks(page, { sessions: twoRepoSessions() });
     await gotoDesktop(page);
@@ -292,12 +292,12 @@ test.describe("sidebar view menu and My groups slices (#5896)", () => {
     await page.keyboard.press("ArrowDown");
     await expect(item("sidebar-view-group-group")).toBeFocused();
     await page.keyboard.press("End");
-    await expect(item("sidebar-view-reset-order")).toBeFocused();
+    await expect(item("sidebar-view-sort-name")).toBeFocused();
     // Both ends wrap.
     await page.keyboard.press("ArrowDown");
     await expect(item("sidebar-view-group-project")).toBeFocused();
     await page.keyboard.press("ArrowUp");
-    await expect(item("sidebar-view-reset-order")).toBeFocused();
+    await expect(item("sidebar-view-sort-name")).toBeFocused();
     await page.keyboard.press("Home");
     await expect(item("sidebar-view-group-project")).toBeFocused();
 
@@ -325,7 +325,7 @@ test.describe("sidebar view menu and My groups slices (#5896)", () => {
   test("bulk archive targets each selected row's own session when one workspace straddles two Groups", async ({
     page,
   }) => {
-    // One workspace with a session in each of two Groups: My groups renders it twice, and the
+    // One workspace with a session in each of two Groups: Groups renders it twice, and the
     // alpha Group sorts first, so the workspace id alone resolves to its session.
     const sessions: MockSessionInput[] = [
       {

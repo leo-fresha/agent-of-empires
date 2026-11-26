@@ -85,16 +85,18 @@ The sidebar header's view button reads the grouping and the sort, for example **
 **Group by**:
 
 - **Repository** (default): a header per git repository, with your Groups nested inside it. Sessions in no Group sit directly under the repository header. A session split across Groups appears once per Group.
-- **My groups**: a header per user-defined Group, assigned in the TUI rename dialog, with `aoe group move`, or via **Move to another group** below. Ungrouped sessions sit in an **Ungrouped** bucket at the top, as in the TUI.
+- **Groups**: a header per user-defined Group, assigned in the TUI rename dialog, with `aoe group move`, or via **Move to another group** below. Ungrouped sessions sit in an **Ungrouped** bucket at the top, as in the TUI.
 
 Collapse state is tracked per grouping and is not shared with the TUI.
 
 **Sort**:
 
 - **Custom** (default): the order you set by dragging. Press and hold a row to move it within its header, or press and drag a repository header (there is no separate handle) to move the whole repository. Press and drag a Group header to move it among the Groups that share its parent, under either grouping. Groups follow each profile's Group order, which the TUI shows and moves too; ones never arranged follow by name. A Group shared by two profiles does not move, and a drop that cannot be made snaps back with a notice saying why. Rows and repository headers you never moved sit on top, newest first. The order is the one the TUI uses, stored in `workspace-ordering.json` and, for Groups, each profile's `groups.json`. While a move is saving, another drag is refused with "The last move is still saving".
-- **Name**: rows A to Z by title, headers by name, ignoring case. Dragging a row or repository header switches to Custom, starting from the order on screen, Group headers included, so only what you dragged moves; the "Sorted by Custom now" notice offers **Undo**. When Groups of several profiles would change places under Custom, the drag is refused and asks you to pick Custom first, and when the switch fails the order is put back with a notice. Dragging a Group header moves nothing and says "Pick Custom to arrange groups".
-- **Reset to newest first** clears the Custom order of rows and repository headers for every Client and keeps the Group order; the "Custom order reset" notice offers **Undo**, which puts back those two orders. Either Undo puts back only what that change rewrote, until the notice closes or the order or sort changes again, here or in another Client.
+- **Newest first**: rows by their newest session, newest on top, and headers by the newest session under them that is not archived or trashed, as in the TUI. Switching sorts keeps the Custom order.
+- **Name**: rows A to Z by title, headers by name, ignoring case.
 - Plugin sorts, when a plugin offers one, are listed below and apply only in this browser until you reload or pick another sort. Dragging is off while one applies.
+
+Under Newest first or Name, dragging a row or a header switches to Custom, starting from the order on screen, Group headers included, so only what you dragged moves; the "Switched to Custom" notice offers **Undo**, which puts back the orders that drag rewrote and the previous sort, until the notice closes or the order or sort changes again, here or in another Client. When no Group order can keep the headers where they are, for example Groups of several profiles, the drag is refused and asks you to pick Custom first, and when the switch fails the order is put back with a notice.
 
 Pinned rows stay at the top of their header under every sort. The Multi-repo and Scratch headers stay at the bottom. Header drag is off while a filter is active, and every drag is off while a plugin facet filters the rows. In CityHall client mode the grouping, the sort and the row and repository order are fixed; Group headers still move.
 
@@ -112,7 +114,7 @@ replay against replacement sessions or a replacement daemon.
 
 The right-click (long-press on touch) context menu on any session row exposes these triage primitives:
 
-- **Pin**: floats the workspace to the top of its header in every sort. Pin is web-only and distinct from the favorite mark. Favorites keep their `✦` marker in both normal and compact sidebars; in the TUI a favorite pins to the top of its sibling scope under Name while `session.favorites_first` is on (the default).
+- **Pin**: floats the workspace to the top of its header in every sort. Pin is web-only and distinct from the favorite mark. Favorites keep their `✦` marker in both normal and compact sidebars; in the TUI a favorite pins to the top of its sibling scope under Name and Newest first while `session.favorites_first` is on (the default).
 - **Archive**: tears down every tmux session the workspace owns (agent, web terminal, container terminal, and tool sub-sessions; pass `kill_pane: false` in the API body, or `--no-kill` on the CLI, to skip the tmux teardown) and shuts down the structured-view worker for ACP sessions, then sinks the row into the collapsible "Snoozed & archived" footer. Daemon restarts skip archived sessions. An archived session never starts or resumes, whether from a message, **Start**, attaching, or a daemon restart; unarchive it first. See #1868.
 - **Snooze**: sinks the row for a chosen duration (presets: 1h, 2h, 3h, 4h, 5h, 6h, 1d, 1w). Wakes when the timer expires; sending a message wakes it early.
 - **Ignore managed session**: for a session another session created or drives, hides it from attention badges and the Needs you filter while keeping it live and in the list. It is neither archived nor trashed, so it still starts and accepts direct user input, which clears the marker; non-user sends (MCP `send_to`, plugin messages and turns) return an `ignored` error until it is unignored or reclaimed. Pinning, favoriting, archiving, or snoozing also clears the marker. **Take ownership back** in the same menu clears the manager link and the ignore marker together, leaving the session, its conversation, and its other triage marks untouched.
@@ -142,12 +144,12 @@ A Projects section near the bottom of the sidebar (above "Snoozed & archived") l
 What it lists depends on whether the grouping draws repository headers:
 
 - **Repository** draws them, so the section is **Projects, no sessions**: registered Projects that are not pinned and have no live session. A pinned Project renders above as its own header, with or without sessions, and a Project with live sessions renders above as a normal group. Repository headers backed by a registered Project carry a ◇ marker, and a pinned one ◆.
-- **My groups** draws Groups instead, so the section is **Projects** and lists every registered Project once, with or without live sessions; a pinned one is marked ◆.
+- **Groups** draws Groups instead, so the section is **Projects** and lists every registered Project once, with or without live sessions; a pinned one is marked ◆.
 
 The compact sidebar labels it **Projects** in every mode.
 
 - **Add** with the **+** on the section header: browse for a path or type one, optionally set a name and a default base branch, choose global or profile scope, then save. The project appears in the section, ready to start work in.
-- **Start a session** by clicking a project row (or its **+**), which opens the new-session flow in that repo. Once it has a session it moves up into the normal group list, except under **My groups**, where it stays in the section.
+- **Start a session** by clicking a project row (or its **+**), which opens the new-session flow in that repo. Once it has a session it moves up into the normal group list, except under **Groups**, where it stays in the section.
 - **Project settings** and **Remove** live in the row's right-click (long-press on touch) menu. Project settings control the default base branch plus worktree-by-default, smart-rename and start-in-container overrides. Remove targets that row's registrations; see [project registry scope](../multi-repo-workspaces.md#web-dashboard). The add, edit, and remove controls are hidden in read-only mode.
 
 ## Settings

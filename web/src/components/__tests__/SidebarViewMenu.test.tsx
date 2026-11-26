@@ -18,7 +18,6 @@ function setup() {
       sort="custom"
       onGroupByChange={vi.fn()}
       onSortChange={vi.fn()}
-      onResetCustomOrder={vi.fn()}
       pluginSorts={[]}
       pluginSortRef={null}
       onPluginSortChange={vi.fn()}
@@ -52,7 +51,6 @@ describe("SidebarViewMenu", () => {
         sort="custom"
         onGroupByChange={vi.fn()}
         onSortChange={onSortChange}
-        onResetCustomOrder={vi.fn()}
         pluginSorts={[{ pluginId: "p", entryId: "e", label: "Cost", column: "cost", direction: "asc" }]}
         pluginSortRef={{ pluginId: "p", entryId: "e" }}
         onPluginSortChange={vi.fn()}

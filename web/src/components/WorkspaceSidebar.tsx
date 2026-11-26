@@ -56,8 +56,7 @@ interface Props {
   sort: SidebarSort;
   onGroupByChange: (groupBy: SidebarGroupBy) => void;
   onSortChange: (sort: SidebarSort) => void;
-  onResetCustomOrder: () => void;
-  /** My groups. */
+  /** Groups. */
   groups: SidebarGroup[];
   /** Repository. */
   nestedGroups: NestedSidebarGroup[];
@@ -173,7 +172,7 @@ export function WorkspaceSidebar(props: Props) {
   const isNested = groupBy === "project";
 
   // An expanded sibling keeps its own optimistic override, which has to reconcile against its one session,
-  // also after its siblings are gone. My groups repeats a workspace per Group, so the records come from every
+  // also after its siblings are gone. Groups repeats a workspace per Group, so the records come from every
   // slice of both groupings plus their session children.
   const triageWorkspaces = useMemo(() => {
     const slices = [groups, ...nestedGroups.map((n) => n.subgroups)]
@@ -182,7 +181,7 @@ export function WorkspaceSidebar(props: Props) {
     return [...slices, ...sessionWorkspaces(slices)];
   }, [groups, nestedGroups]);
   const triage = useSidebarTriage(triageWorkspaces);
-  // Rows, not workspaces: My groups renders a workspace once per Group, and each row's actions belong to its
+  // Rows, not workspaces: Groups renders a workspace once per Group, and each row's actions belong to its
   // own session. Filtering keeps the selection, so ranges use `filtered`.
   const [orderedIds, rows] = useMemo(() => {
     const filteredAll = isNested ? filteredNested.flatMap((ng) => ng.subgroups) : filteredGroups;
@@ -323,7 +322,6 @@ export function WorkspaceSidebar(props: Props) {
           sort={props.sort}
           onGroupByChange={props.onGroupByChange}
           onSortChange={props.onSortChange}
-          onResetCustomOrder={props.onResetCustomOrder}
           viewLocked={viewLocked}
           rightSide={rightSide}
           pluginSorts={pluginSorts}

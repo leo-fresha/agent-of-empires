@@ -9,7 +9,7 @@ import { TOOLBAR_BUTTON, TOOLBAR_TINT } from "./styles";
 type PluginSortRef = { pluginId: string; entryId: string };
 
 const GROUPINGS: readonly SidebarGroupBy[] = ["project", "group"];
-const SORTS: readonly SidebarSort[] = ["custom", "name"];
+const SORTS: readonly SidebarSort[] = ["custom", "newest", "name"];
 
 const ITEM =
   "w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left cursor-pointer hover:bg-surface-700/60 focus-visible:outline-none focus-visible:bg-surface-700/60 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent";
@@ -25,8 +25,8 @@ function SectionLabel({ children }: { children: ReactNode }) {
 const Separator = () => <div className="my-1 border-t border-surface-700/50" role="separator" />;
 
 /**
- * The sidebar's one view control: the grouping and the sort every Client shares, the Custom order reset, and
- * this browser's plugin sorts. The trigger reads "<Grouping> · <Sort>".
+ * The sidebar's one view control: the grouping and the sort every Client shares, and this browser's plugin
+ * sorts. The trigger reads "<Grouping> · <Sort>".
  */
 export function SidebarViewMenu({
   compact,
@@ -34,7 +34,6 @@ export function SidebarViewMenu({
   sort,
   onGroupByChange,
   onSortChange,
-  onResetCustomOrder,
   pluginSorts,
   pluginSortRef,
   onPluginSortChange,
@@ -46,7 +45,6 @@ export function SidebarViewMenu({
   sort: SidebarSort;
   onGroupByChange: (groupBy: SidebarGroupBy) => void;
   onSortChange: (sort: SidebarSort) => void;
-  onResetCustomOrder: () => void;
   pluginSorts: PluginSortSpec[];
   pluginSortRef: PluginSortRef | null;
   onPluginSortChange: (ref: PluginSortRef) => void;
@@ -232,21 +230,6 @@ export function SidebarViewMenu({
               ),
             )}
           </div>
-          <Separator />
-          <button
-            type="button"
-            role="menuitem"
-            tabIndex={-1}
-            disabled={locked}
-            data-testid="sidebar-view-reset-order"
-            onClick={() => {
-              close();
-              onResetCustomOrder();
-            }}
-            className={`${ITEM} text-text-secondary hover:text-text-primary`}
-          >
-            Reset to newest first
-          </button>
           {pluginSorts.length > 0 && (
             <>
               <Separator />
