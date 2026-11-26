@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { fetchSuggestions } from "../lib/api";
 import { X } from "lucide-react";
+import { reportFeatureUse } from "../lib/featureUse";
+import { useReportFeatureOnce } from "../hooks/useReportFeatureOnce";
 import {
   discoveryFailureText,
   loadFeaturedSuggestionSources,
@@ -83,9 +85,14 @@ export function SuggestionsSetupHint({
   };
 
   const dismiss = () => {
+    reportFeatureUse("suggest_tip_dismissed");
     safeSetItem(DISMISSED_KEY, "1");
     setDismissed(true);
   };
+  useReportFeatureOnce(
+    "suggest_tip_shown",
+    noProvider && !hidden && featured.status === "ok" && featured.sources.length > 0,
+  );
 
   if (!noProvider) return null;
   if (hidden) return fallback;
@@ -123,7 +130,10 @@ export function SuggestionsSetupHint({
         <button
           type="button"
           className="min-h-8 cursor-pointer font-medium text-brand-500 hover:underline"
-          onClick={() => setSheetOpen(true)}
+          onClick={() => {
+            reportFeatureUse("suggest_tip_clicked");
+            setSheetOpen(true);
+          }}
           data-testid="suggestions-hint-open"
         >
           Set up suggestions
